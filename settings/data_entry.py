@@ -4,16 +4,16 @@ class data_entry:
         self.attributes = {}
 
     def __str__(self):
-        problem_str = "{"
+        entry_str = "{"
 
         for key, value in self.attributes.items():
-            if len(problem_str) > 1:
-                problem_str += ", "
-            problem_str += str(key) + " : " + str(value)
+            if len(entry_str) > 1:
+                entry_str += ", "
+            entry_str += str(key) + " : " + str(value)
 
-        problem_str += "}"
+        entry_str += "}"
 
-        return problem_str
+        return entry_str
     
     def set_attribute(self, key, value):
         self.attributes[key] = value

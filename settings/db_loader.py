@@ -69,7 +69,7 @@ def load_table(table_name):
     return entries
 
 # Resolve "key_name" attribute of dict, from id to data_entry
-def resolve_foreign_key (dict, foreign_dict, key_name):
+def resolve_foreign_key(dict, foreign_dict, key_name):
     for value in dict.values():
         foreign_key = value.get_attribute(key_name)
         
