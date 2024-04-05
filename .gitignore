@@ -1,6 +1,6 @@
 # Environment file
 .env
-*/.secret.toml
+settings/.secret.toml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
