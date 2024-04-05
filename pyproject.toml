@@ -8,6 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 dynaconf = "^3.2.5"
+mysql-connector = "^2.2.9"
 
 [tool.poetry.group.dev.dependencies]
 openai = "^1.16.2"
