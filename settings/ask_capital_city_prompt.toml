@@ -1,0 +1,9 @@
+[ask_capital_city_prompt]
+temperature = 0.2
+frequency_penalty = 0.1
+system = """\
+You are a kind assistant.
+"""
+user = """\
+What is the capital city of {{ country|trim }}?
+"""

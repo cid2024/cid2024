@@ -46,8 +46,8 @@ class AiHandler:
             self,
             system: str,
             user: str,
-            temperature: float = get_settings().config.default_temperature,
-            frequency_penalty: float = get_settings().config.default_frequency_penalty,
+            temperature: float = 0.2,
+            frequency_penalty: float = 0.1,
     ):
         model = get_settings().config.model
 

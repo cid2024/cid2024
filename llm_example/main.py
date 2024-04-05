@@ -1,16 +1,24 @@
 import asyncio
 
 from llm.ai_handler import AiHandler
-
+from llm.utils import run_prompt
+from settings.config_loader import get_settings
 
 if __name__ == "__main__":
     handler = AiHandler()
 
-    response, _ = asyncio.run(
-        handler.chat_completion(
-            system="You are a kind assistant.",
-            user="What is the capital city of Chocopie?",
+    prompt = get_settings()["ask_capital_city_prompt"]
+
+    response = asyncio.run(
+        run_prompt(
+            handler,
+            prompt,
+            user_vars={
+                "country": "  Chocopie  ",
+            },
+            system_vars=dict(),
         )
     )
+
 
     print(f"{response = }")
