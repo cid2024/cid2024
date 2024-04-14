@@ -1,4 +1,4 @@
-class data_entry:
+class DataEntry:
     def __init__(self, typename = "None"):
         self.typename = typename
         self.attributes = {}

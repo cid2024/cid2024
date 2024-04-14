@@ -1,6 +1,6 @@
 import random
 import mysql.connector
-from classes.data_entry import data_entry
+from classes.data_entry import DataEntry
 import settings.config_loader as config_loader
 
 table_names = ["Problem", "ProblemMeta", "Meta", "Test"]
