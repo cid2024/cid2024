@@ -1,7 +1,7 @@
 import random
 import mysql.connector
-from data_entry import data_entry
-import config_loader
+from classes.data_entry import data_entry
+import settings.config_loader as config_loader
 
 table_names = ["Problem", "ProblemMeta", "Meta", "Test"]
 
@@ -92,20 +92,3 @@ def get_full_data():
     resolve_foreign_key(data["Test"], data["Meta"], "meta_id")
 
     return data
-
-if __name__ == "__main__":
-    num_dump = 5
-
-    for table_name in table_names:
-        print("# Raw data of table '{0}'".format(table_name))
-        dump_table(table_name, 5)
-        print("------------------------------------")
-
-    data = get_full_data()
-
-    for table_name, table_dict in data.items():
-        print("# Loaded data of table '{0}'".format(table_name))
-        value_list = list(table_dict.values())
-        for i in range(num_dump):
-            print(value_list[i])
-        print("------------------------------------")
