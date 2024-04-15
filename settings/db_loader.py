@@ -79,9 +79,13 @@ def resolve_foreign_key(dict, foreign_dict, key_name):
         
         value.set_attribute(key_name, resolved_value)
 
+data = {}
+
 # Get full data: dict of (key: table name, value: dict of (id, DataEntry))
 def get_full_data():
-    data = {}
+    global data
+    if len(data) > 0:
+        return data
 
     for table_name in table_names:
         data[table_name] = load_table(table_name)
