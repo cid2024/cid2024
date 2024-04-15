@@ -1,6 +1,6 @@
 import random
 import mysql.connector
-from classes.data_entry import DataEntry
+from classes.common.data_entry import DataEntry
 import settings.config_loader as config_loader
 
 table_names = ["Problem", "ProblemMeta", "Meta", "Test"]
@@ -36,7 +36,7 @@ def dump_table(table_name, num_dump = -1):
         print(row_datas[index])
 
 
-# Load data of a table: dict of (key: id, value: data_entry)
+# Load data of a table: dict of (key: id, value: DataEntry)
 def load_table(table_name):
     cursor.execute("SHOW COLUMNS FROM " + table_name)
     headers = cursor.fetchall()
@@ -59,7 +59,7 @@ def load_table(table_name):
     entries = {}
 
     for row_data in row_datas:
-        cur_entry = data_entry(table_name)
+        cur_entry = DataEntry(table_name)
         
         for (header, data) in zip(headers, row_data):
             cur_entry.set_attribute(header[0], data)
@@ -68,7 +68,7 @@ def load_table(table_name):
     
     return entries
 
-# Resolve "key_name" attribute of dict, from id to data_entry
+# Resolve "key_name" attribute of dict, from id to DataEntry
 def resolve_foreign_key(dict, foreign_dict, key_name):
     for value in dict.values():
         foreign_key = value.get_attribute(key_name)
@@ -79,7 +79,7 @@ def resolve_foreign_key(dict, foreign_dict, key_name):
         
         value.set_attribute(key_name, resolved_value)
 
-# Get full data: dict of (key: table name, value: dict of (id, data_entry))
+# Get full data: dict of (key: table name, value: dict of (id, DataEntry))
 def get_full_data():
     data = {}
 
