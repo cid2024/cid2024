@@ -1,8 +1,10 @@
 from PyQt6.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QFrame, QScrollArea
+from PyQt6.QtCore import Qt
 
 from classes.viewer.widgets.action_list import ActionListWidget
 from classes.viewer.widgets.action_result import ActionResultWidget
 from classes.viewer.actions.all_problem import AllProblemAction
+from classes.viewer.actions.random_problem import RandomProblemAction
 
 from settings.db_loader import get_full_data
 
@@ -60,14 +62,17 @@ class ViewerMainWindow(QMainWindow):
             if widget is not None:
                 widget.deleteLater()
     
-    def add_canvas_widget(self, widget):
-        self.canvas_layout.addWidget(widget)
+    def add_canvas_widget(self, widget = None):
+        if widget == None:
+            self.canvas_layout.addWidget(QWidget(), 1)
+        else:
+            self.canvas_layout.addWidget(widget)
 
 if __name__ == "__main__":
     print("# Viewer will be opened after preprocessing db.")
     get_full_data()
 
     app = QApplication([])
-    window = ViewerMainWindow(actions=[ AllProblemAction() ])
+    window = ViewerMainWindow(actions=[ AllProblemAction(), RandomProblemAction() ])
     window.show()
     app.exec()

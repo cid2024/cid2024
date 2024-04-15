@@ -1,9 +1,10 @@
 import sys
+from functools import partial
 from PyQt6.QtWidgets import QListWidget, QVBoxLayout, QWidget, QLabel, QPushButton
 from PyQt6.QtCore import Qt
 
 class ListWidget(QWidget):
-    def __init__(self, title_text, button_text):
+    def __init__(self, title_text, button_texts):
         super().__init__()
 
         self.label_to_item = {}
@@ -18,26 +19,27 @@ class ListWidget(QWidget):
         self.title_label = QLabel(title_text)
         self.title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        # Create a button
-        self.button = QPushButton(button_text)
-        self.button.clicked.connect(self.button_clicked)
-
-        # Set up the layout
         layout = QVBoxLayout()
-        layout.addWidget(self.title_label)  # Add the title label at the top
-        layout.addWidget(self.list_widget)  # Add the list widget in the middle
-        layout.addWidget(self.button)       # Add the button at the bottom
+        layout.addWidget(self.title_label)
+        layout.addWidget(self.list_widget)
+
+        for button_text in button_texts:
+            # Create a button
+            button = QPushButton(button_text)
+            button.clicked.connect(partial(self.button_clicked, button_text))
+            layout.addWidget(button)
+
         self.setLayout(layout)
 
-    def button_clicked(self):
+    def button_clicked(self, button_text):
         # This function is triggered when the button is clicked
         selected_items = self.list_widget.selectedItems()
         if selected_items:
             selected_item_label = selected_items[0].text()
             if selected_item_label in self.label_to_item:
-                self.on_selected(self.label_to_item[selected_item_label])
+                self.on_selected(button_text, self.label_to_item[selected_item_label])
 
-    def on_selected(self, item):
+    def on_selected(self, button_text, item):
         pass
 
     def clear_list(self):

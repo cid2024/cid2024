@@ -8,4 +8,4 @@ class AllProblemAction(Action):
     def run(self):
         data = get_full_data()
         for id, problem in data["Problem"].items():
-            self.result.append((str(id), problem))
+            self.result.append(("id: " + str(id), problem))
