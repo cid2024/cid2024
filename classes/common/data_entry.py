@@ -18,5 +18,8 @@ class DataEntry:
     def set_attribute(self, key, value):
         self.attributes[key] = value
     
+    def has_attribute(self, key):
+        return key in self.attributes
+
     def get_attribute(self, key):
         return self.attributes[key]

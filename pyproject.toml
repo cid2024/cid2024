@@ -10,6 +10,7 @@ packages = [{ include = "**/*" }]
 python = "^3.11"
 dynaconf = "^3.2.5"
 mysql-connector = "^2.2.9"
+pyqt6 = "^6.6.1"
 
 [tool.poetry.group.dev.dependencies]
 openai = "^1.16.2"

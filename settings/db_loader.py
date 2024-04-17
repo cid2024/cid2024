@@ -1,4 +1,5 @@
-import random
+import os
+import pickle
 import mysql.connector
 from classes.common.data_entry import DataEntry
 import settings.config_loader as config_loader
@@ -79,9 +80,22 @@ def resolve_foreign_key(dict, foreign_dict, key_name):
         
         value.set_attribute(key_name, resolved_value)
 
+data = {}
+
 # Get full data: dict of (key: table name, value: dict of (id, DataEntry))
-def get_full_data():
-    data = {}
+def get_full_data(use_cache_file = True):
+    global data
+    if len(data) > 0:
+        return data
+    
+    if use_cache_file:
+        data_file_path = os.path.join(os.path.dirname(__file__), "data.pkl")
+        print("Loading data from cached file: " + data_file_path)
+        if os.path.exists(data_file_path) and os.path.getsize(data_file_path) > 0:
+            data_file = open(data_file_path, "rb")
+            data = pickle.load(data_file)
+            data_file.close()
+            return data
 
     for table_name in table_names:
         data[table_name] = load_table(table_name)
@@ -90,5 +104,10 @@ def get_full_data():
     resolve_foreign_key(data["Problem"], data["Test"], "test_id")
     resolve_foreign_key(data["ProblemMeta"], data["Meta"], "meta_id")
     resolve_foreign_key(data["Test"], data["Meta"], "meta_id")
+
+    if use_cache_file:
+        data_file = open(data_file_path, "wb")
+        pickle.dump(data, data_file)
+        data_file.close()
 
     return data
