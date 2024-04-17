@@ -4,7 +4,7 @@ from random import sample
 
 class RandomProblemAction(Action):
     def __init__(self):
-        super().__init__("View random problems")
+        super().__init__("View Random Problems")
 
     def run(self):
         data = get_full_data()

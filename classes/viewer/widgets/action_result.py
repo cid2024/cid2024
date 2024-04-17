@@ -6,9 +6,16 @@ import requests
 
 import json
 
+def number_to_circle_string(number):
+    circle_strings = " ①②③④⑤"
+    if number < len(circle_strings):
+        return str(circle_strings[number])
+    else:
+        return None
+
 class ActionResultWidget(ListWidget):
     def __init__(self, main_window):
-        super().__init__("Action run results", ["View Rendered", "View Raw"])
+        super().__init__("Action Run Results", ["View Rendered", "View Raw"])
         
         self.main_window = main_window
 
@@ -59,7 +66,7 @@ class ActionResultWidget(ListWidget):
             if meta.has_attribute(selection_text):
                 selection = meta.get_attribute(selection_text)
                 if len(selection) > 0:
-                    label = QLabel(str(i) + ": " + selection)
+                    label = QLabel(number_to_circle_string(i) + ": " + selection)
                     label.setWordWrap(True)
                     widgets.append(label)
 
