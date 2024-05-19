@@ -8,7 +8,7 @@ from collections import OrderedDict
 s2v = Sense2Vec().from_disk('data/s2v_reddit_2019_lg')
 
 
-def sense2vec_get_words(word,s2v):
+def sense2vec_get_words(word, s2v):
     output = []
     word = word.lower()
     word = word.replace(" ", "_")
