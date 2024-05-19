@@ -25,11 +25,16 @@ class AiHandler:
         """
         self.limiter = AsyncLimiter(get_settings().config.max_requests_per_minute)
         try:
-            self.client = AzureOpenAI(
-                azure_endpoint=get_settings().azure.endpoint,
-                api_key=get_settings().azure.key,
-                api_version=get_settings().azure.version,
-            )
+            if get_settings().get("openai", None):
+                self.client = OpenAI(
+                    api_key=get_settings().openai.key,
+                )
+            else:
+                self.client = AzureOpenAI(
+                    azure_endpoint=get_settings().azure.endpoint,
+                    api_key=get_settings().azure.key,
+                    api_version=get_settings().azure.version,
+                )
 
             self.azure = True
         except AttributeError as e:
