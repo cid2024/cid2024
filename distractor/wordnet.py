@@ -49,3 +49,9 @@ if __name__ == "__main__":
     distractors_calculated = get_distractors_wordnet(synset_to_use,original_word)
     print("\noriginal word: ",original_word.capitalize())
     print(distractors_calculated)
+
+    # "서울은 대한민국의 수도이다."
+    # "미국은 1776년에 영국으로부터 독립했다."
+    # "성상숭배 문제로 크리스트교 세계가 분열되었다."
+    # "고조선은 8조법을 만들어 사회질서를 유지하였다."
+    # "서울대학교는 신림동 산56-1번지에 위치하고 있다."
