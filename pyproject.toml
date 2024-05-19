@@ -16,6 +16,9 @@ sense2vec = "^2.0.2"
 torch = "^2.3.0"
 nltk = "^3.8.1"
 sense2vec = "^2.0.2"
+torch = "^2.3.0"
+nltk = "^3.8.1"
+sense2vec = "^2.0.2"
 
 [tool.poetry.group.dev.dependencies]
 openai = "^1.16.2"
