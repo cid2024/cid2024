@@ -160,4 +160,4 @@ cython_debug/
 *.pkl
 
 # Local test result files
-*.png
+geojson_map.png
