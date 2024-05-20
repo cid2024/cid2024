@@ -158,3 +158,6 @@ cython_debug/
 
 # Python pickle
 *.pkl
+
+# Local test result files
+*.png

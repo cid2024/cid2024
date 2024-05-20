@@ -1,12 +1,9 @@
-from korean_geocoding.geocoding import KoreanGeocoding as Kg
 import requests
 from deep_translator import GoogleTranslator
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import contextily as ctx
-import json
 
-kg = Kg()
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'}
 
 def geocoding(query):
