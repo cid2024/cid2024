@@ -3,10 +3,10 @@ from deep_translator import GoogleTranslator
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import contextily as ctx
-from .dictionaries import kor_geojson
+from shapely.geometry import shape, box
+from .dictionaries import kor_bbox
 
 headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'}
-kor_bg = kor_geojson()
 
 def geocoding(query):
   with requests.get("https://nominatim.openstreetmap.org/search?q="+query+"&format=json&polygon_geojson=1", headers=headers) as response:
@@ -27,17 +27,29 @@ def geocoding(query):
           print(response.status_code, end=" ")
           print("Error: Cannot fetch response from Nominatim.")
           return None
+        
+def gen_bbox(feature_dict):
+  for bbox in kor_bbox:
+    bbox_shape = box(minx=bbox[1], miny=bbox[0], maxx=bbox[3], maxy=bbox[2])
+    flag = True
+    for feature in feature_dict["features"]:
+      geometry = shape(feature["geometry"])
+      if not geometry.within(bbox_shape):
+        flag = False
+        break
+    if flag:
+      return bbox_shape
+  return box(minx=-175, miny=-80, maxx=175, maxy=80)
 
 def display_features(feature_dict):
-  feature_dict = {"type": "FeatureCollection", "features": feature_dict["features"]}
-  gdf_bg = gpd.GeoDataFrame.from_features({"type": "FeatureCollection", "features": kor_bg})
-  gdf_bg = gdf_bg.set_crs("EPSG:4326")
+  bbox = gen_bbox(feature_dict)
+  bbox_x, bbox_y = bbox.exterior.xy
   gdf = gpd.GeoDataFrame.from_features(feature_dict)
   gdf = gdf.set_crs("EPSG:4326")
   fig, ax = plt.subplots(figsize=(10, 10))
-  gdf_bg.plot(ax=ax, alpha=0, edgecolor='w')
   gdf.plot(ax=ax, alpha=1, edgecolor='w')
-  ctx.add_basemap(ax, crs=gdf.crs.to_string(), source=ctx.providers.Esri.WorldGrayCanvas)
+  ax.fill(bbox_x, bbox_y, alpha=0)
+  ctx.add_basemap(ax, crs=gdf.crs.to_string(), source=ctx.providers.CartoDB.PositronNoLabels)
   plt.savefig('geojson_map.png')
   plt.show()
 
@@ -66,4 +78,4 @@ def draw_map(query_list, points=False):
   else:
     display_features({"type": "FeatureCollection", "features": features})
 
-draw_map(["타클라마칸 사막", "사마르칸트", "테헤란", "이스탄불"], True)
+draw_map(["요르단", "쿠웨이트", "바레인", "오만"], True)
