@@ -1,12 +1,13 @@
 import os, re
 
-def get_textbook(code = "eastasia"):
+
+def get_textbook(code) -> list[str] | None:
     textbook_filename = "textbook_" + str(code) + ".txt"
     textbook_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", textbook_filename)
 
     if not os.path.isfile(textbook_path) or os.path.getsize(textbook_path) <= 0:
         return None
-    
+
     textbook = open(textbook_path, "r")
     lines = textbook.readlines()
 
