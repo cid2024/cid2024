@@ -6,17 +6,17 @@ import contextily as ctx
 from shapely.geometry import shape, box
 from .dictionaries import kor_bbox
 
-headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'}
+HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'}
 
 def geocoding(query):
-  with requests.get("https://nominatim.openstreetmap.org/search?q="+query+"&format=json&polygon_geojson=1", headers=headers) as response:
+  with requests.get("https://nominatim.openstreetmap.org/search?q="+query+"&format=json&polygon_geojson=1", headers=HEADERS) as response:
     if response.status_code == 200 and response.json() != []:
       return response.json()
     else:
       print("trying query in en...")
       query_en = GoogleTranslator(source='ko', target='en').translate(query)
       print(query_en)
-      with requests.get("https://nominatim.openstreetmap.org/search?q="+query_en+"&format=json&polygon_geojson=1", headers=headers) as response:
+      with requests.get("https://nominatim.openstreetmap.org/search?q="+query_en+"&format=json&polygon_geojson=1", headers=HEADERS) as response:
         if response.status_code == 200:
           if response.json() == []:
             print("Error: Empty response from Nominatim.")
@@ -39,16 +39,19 @@ def gen_bbox(feature_dict):
         break
     if flag:
       return bbox_shape
-  return box(minx=-175, miny=-80, maxx=175, maxy=80)
+  return box(minx=-180, miny=-60, maxx=180, maxy=75)
 
 def display_features(feature_dict):
   bbox = gen_bbox(feature_dict)
-  bbox_x, bbox_y = bbox.exterior.xy
-  gdf = gpd.GeoDataFrame.from_features(feature_dict)
-  gdf = gdf.set_crs("EPSG:4326")
-  fig, ax = plt.subplots(figsize=(10, 10))
+  gdf_bb = gpd.GeoDataFrame({"name": ["Bounding Box"], "value": [0]}, crs="EPSG:4326", geometry=[bbox])
+  gdf_bb = gdf_bb.to_crs(epsg=3857)
+  gdf = gpd.GeoDataFrame.from_features(feature_dict, crs="EPSG:4326")
+  gdf = gdf.to_crs(epsg=3857)
+  fig = plt.figure(figsize=(16, 9))
+  ax = plt.subplot()
   gdf.plot(ax=ax, alpha=1, edgecolor='w')
-  ax.fill(bbox_x, bbox_y, alpha=0)
+  gdf_bb.plot(ax=ax, alpha=0)
+  assert gdf.crs.to_string() == gdf_bb.crs.to_string()
   ctx.add_basemap(ax, crs=gdf.crs.to_string(), source=ctx.providers.CartoDB.PositronNoLabels)
   plt.savefig('geojson_map.png')
   plt.show()
@@ -78,4 +81,4 @@ def draw_map(query_list, points=False):
   else:
     display_features({"type": "FeatureCollection", "features": features})
 
-draw_map(["요르단", "쿠웨이트", "바레인", "오만"], True)
+draw_map(["중국", "러시아", "이란", "미국"], True)

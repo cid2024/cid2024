@@ -27,8 +27,8 @@ kor_bbox = [
     [10, -30, 70, 50], # Europe
     [-45, -25, 60, 35], # Africa
     [0, -30, 70, 80], # Europe and Middle East
-    [0, -180, 80, -45], # North America
+    [0, -179, 75, -45], # North America
     [-55, -130, 30, 20], # Latin America
-    [-55, -180, 80, 20], # Americas
-    [-80, -180, 80, 180], # World
+    [-55, -179, 75, 20], # Americas
+    [-60, -179, 75, 179], # World
 ]
