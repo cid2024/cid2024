@@ -39,8 +39,8 @@ def extract_key_sentences(handler: AiHandler, reference: str, expected_num: int)
 
     ret: list[KeySentence] = []
     for sample in extract_response:
-        sentence = sample.get("sentence", None)
-        keyword = sample.get("keyword", None)
+        sentence = sample.get("sentence", "").strip()
+        keyword = sample.get("keyword", "").strip()
 
         if not sentence or not keyword:
             continue
@@ -60,7 +60,7 @@ def extract_key_sentences(handler: AiHandler, reference: str, expected_num: int)
 
         try:
             revise_response = parse_llm_yaml(revise_response)["revised_sentence"][0]
-            sentence = revise_response.get("sentence", None)
+            sentence = revise_response.get("sentence", "").strip()
             if sentence and keyword:
                 ret.append(KeySentence(sentence=sentence, keyword=keyword))
         except:

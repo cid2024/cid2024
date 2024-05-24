@@ -50,3 +50,64 @@ distractors:
 Answer:
 ```yaml
 """
+
+[distractor_history_korean_describe_related_prompt]
+temperature = 0.4
+frequency_penalty = 0.1
+system = """\
+당신은 고등학교 한국사 교과목을 가르치는 교사입니다. 매우 정확하고 박식한 지식을 가지고 있습니다.
+"""
+user = """\
+아래에 주어진 글과 연관된 내용을 상세하게 세 문단 내외로 서술하라.
+한국사에서 역사적 전후 상황을 이해하는 데 도움이 되는 사건이나 인물, 국가나 지역명 등을 포함하여 서술하라.
+
+글:
+===
+{{ context|trim }}
+"""
+
+[distractor_history_korean_gen_sentences_prompt]
+temperature = 0.8
+frequency_penalty = 0.1
+system = """\
+당신은 고등학교 한국사 교과목을 가르치는 교사입니다. 매우 정확하고 박식한 지식을 가지고 있습니다.
+"""
+user = """\
+다음은 교과서에서 발췌한 문단이다:
+
+교과서 문단:
+===
+{{ reference|trim }}
+===
+
+한국사 시험 문제에서 고등학교 학생들이 헷갈리는 선지를 만들기 위해, 다음 문장의 단어를 바꿔서 새로운 문장을 5개 만드시오.
+
+한국사 시험에서 선호하는 문장의 변형 예시로는 다음과 같다:
+* 전쟁명을 비슷한 시기에 발생했던 한국 역사상 외국의 침략으로 인해 발생한 전쟁이나 군사적 충돌로 바꾸기
+* 국가명을 시대를 무시하더라도 지리적으로 비슷한 다른 고대 국가로 바꾸기
+* 왕을 비슷한 시대의 한국의 역대 왕의 이름으로 바꾸기
+* 법과 제도명을 고대 한국에서 시행된 법제나 제도의 이름으로 바꾸기
+* 저서를 고등학교 한국사에서 배우는 책의 이름으로 바꾸기
+
+문장: {{ sentence|trim }}
+
+다음 Pydantic 정의를 참고하여, $Distractor 타입과 일치하는 YAML 객체를 출력하라:
+===
+Class Distractor(BaseModel):
+    sentence: str = Field(description="새로운 문장")
+    explanation: str = Field(description="선지가 학생들을 헷갈리게 하는 이유")
+===
+
+YAML 객체 예시:
+```yaml
+distractors:
+- sentence: |
+    ...
+  explanation: |
+    ...
+...
+```
+
+Answer:
+```yaml
+"""
