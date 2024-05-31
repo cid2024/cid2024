@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Literal
 
 from jinja2 import Template
 
@@ -21,12 +21,11 @@ async def run_prompt(
     system_msg = Template(prompt.system).render(**system_vars)
     user_msg = Template(prompt.user).render(**user_vars)
 
-    temperature = prompt.get("temperature", get_settings().config.default_temperature)
-    frequency_penalty = prompt.get(
-        "frequency_penalty", get_settings().config.default_frequency_penalty
-    )
+    temperature = prompt.get("temperature", None)
+    frequency_penalty = prompt.get("frequency_penalty", None)
 
     response, _ = await handler.chat_completion(
+        model_name=prompt.get("model"),
         system=system_msg,
         user=user_msg,
         temperature=temperature,
