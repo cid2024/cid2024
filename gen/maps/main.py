@@ -6,7 +6,15 @@ import contextily as ctx
 from shapely.geometry import shape, box
 from .dictionaries import kor_bbox
 
+plt.rcParams['font.family'] ='Apple SD Gothic Neo'
+plt.rcParams['axes.unicode_minus'] =False
+
 HEADERS = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'}
+
+def korord(ord):
+  dict = ['가', '나', '다', '라', '마', '바', '사', '아', '자', '차', '카', '타', '파', '하']
+  if ord < len(dict): return '('+dict[ord]+')'
+  else: return '('+chr(ord('A')+ord)+')'
 
 def geocoding(query):
   with requests.get("https://nominatim.openstreetmap.org/search?q="+query+"&format=json&polygon_geojson=1", headers=HEADERS) as response:
@@ -41,7 +49,7 @@ def gen_bbox(feature_dict):
       return bbox_shape
   return box(minx=-180, miny=-60, maxx=180, maxy=75)
 
-def display_features(feature_dict):
+def display_features(feature_dict, points, annotated):
   bbox = gen_bbox(feature_dict)
   gdf_bb = gpd.GeoDataFrame({"name": ["Bounding Box"], "value": [0]}, crs="EPSG:4326", geometry=[bbox])
   gdf_bb = gdf_bb.to_crs(epsg=3857)
@@ -49,7 +57,12 @@ def display_features(feature_dict):
   gdf = gdf.to_crs(epsg=3857)
   fig = plt.figure(figsize=(16, 9))
   ax = plt.subplot()
-  gdf.plot(ax=ax, alpha=1, edgecolor='w')
+  gdf.plot(ax=ax, alpha=1, edgecolor='w', color=('black' if points else 'lightblue'))
+  if annotated:
+    gdf['coords'] = gdf['geometry'].apply(lambda x: x.representative_point().coords[:])
+    gdf['coords'] = [coords[0] for coords in gdf['coords']]
+    for idx, row in gdf.iterrows():
+      ax.annotate(text=korord(idx), xy=row['coords'], xytext=(0, (5 if points else 0)), textcoords='offset points', ha='center', fontsize='x-large', fontweight='heavy')
   gdf_bb.plot(ax=ax, alpha=0)
   assert gdf.crs.to_string() == gdf_bb.crs.to_string()
   ctx.add_basemap(ax, crs=gdf.crs.to_string(), source=ctx.providers.CartoDB.PositronNoLabels)
@@ -64,7 +77,7 @@ def translate_to_points(feature_list):
     ret.append({"id": feature["id"], "type": "Feature", "geometry": {"type": "Point", "coordinates": [gdf["geometry"].centroid.x, gdf["geometry"].centroid.y]}, "properties": {"name": feature["properties"]["name"] + "_centroid"}})
   return ret
 
-def draw_map(query_list, points=False):
+def draw_map(query_list, points=False, annotated=False):
   features = []
   id = 0
   for query in query_list:
@@ -80,8 +93,8 @@ def draw_map(query_list, points=False):
         features.append({"id": id, "type": "Feature", "geometry": geometry[0]['geojson'], "properties": {"name": query}})
       id += 1
   if points:
-    display_features({"type": "FeatureCollection", "features": translate_to_points(features)})
+    display_features({"type": "FeatureCollection", "features": translate_to_points(features)}, points, annotated)
   else:
-    display_features({"type": "FeatureCollection", "features": features})
+    display_features({"type": "FeatureCollection", "features": features}, points, annotated)
 
-draw_map(["말레이시아", "미국", "영국", "베트남"], True)
+draw_map(["수마트라 섬", "루손 섬", "팔라완 섬", "보르네오 섬"], False, True)
