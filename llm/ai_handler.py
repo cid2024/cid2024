@@ -25,13 +25,16 @@ class AiHandler:
         """
         self.limiter = AsyncLimiter(get_settings().config.max_requests_per_minute)
         try:
-            self.client = AzureOpenAI(
-                azure_endpoint=get_settings().azure.endpoint,
-                api_key=get_settings().azure.key,
-                api_version=get_settings().azure.version,
+            self.client = OpenAI(
+                api_key=get_settings().openai.key,
             )
+            # self.client = AzureOpenAI(
+            #     azure_endpoint=get_settings().azure.endpoint,
+            #     api_key=get_settings().azure.key,
+            #     api_version=get_settings().azure.version,
+            # )
 
-            self.azure = True
+            self.azure = False
         except AttributeError as e:
             raise ValueError("OpenAI key is required") from e
 
@@ -44,12 +47,17 @@ class AiHandler:
     )
     async def chat_completion(
             self,
+            model_name: str,
             system: str,
             user: str,
-            temperature: float = 0.2,
-            frequency_penalty: float = 0.1,
+            temperature: float | None = None,
+            frequency_penalty: float | None = None,
     ):
-        model = get_settings().config.model
+        model = get_settings().config.models.get(model_name)
+        if temperature is None:
+            temperature = get_settings().config.default_temperature
+        if frequency_penalty is None:
+            frequency_penalty = get_settings().config.default_frequency_penalty
 
         try:
             if get_settings().config.verbosity_level >= 2:
@@ -64,7 +72,7 @@ class AiHandler:
                 logger.debug(f"user:\n{user}")
 
                 response = self.client.chat.completions.create(
-                    model=model,
+                    model=model.name,
                     messages=[
                         {"role": "system", "content": system},
                         {"role": "user", "content": user},
@@ -72,7 +80,7 @@ class AiHandler:
                     temperature=temperature,
                     frequency_penalty=frequency_penalty,
                     timeout=get_settings().config.ai_timeout,
-                    max_tokens=get_settings().config.max_tokens,
+                    max_tokens=model.max_tokens,
                 )
         except Exception as e:
             logging.error("Unknown error during OpenAI inference: ", e)
