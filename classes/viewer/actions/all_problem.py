@@ -5,7 +5,7 @@ class AllProblemAction(Action):
     def __init__(self):
         super().__init__("View All Problems")
 
-    def run(self):
+    def run(self, main_window = None):
         data = get_full_data()
         for id, problem in data["Problem"].items():
             self.result.append(("id: " + str(id), problem))

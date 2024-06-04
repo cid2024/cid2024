@@ -5,6 +5,7 @@ from classes.viewer.widgets.action_list import ActionListWidget
 from classes.viewer.widgets.action_result import ActionResultWidget
 from classes.viewer.actions.all_problem import AllProblemAction
 from classes.viewer.actions.random_problem import RandomProblemAction
+from classes.viewer.actions.similar_problem import SimilarProblemAction
 
 from settings.db_loader import get_full_data
 
@@ -20,7 +21,7 @@ class ViewerMainWindow(QMainWindow):
         self.canvas_scroll_area.setWidget(self.canvas)
 
         self.action_result = ActionResultWidget(self)
-        self.action_list = ActionListWidget(self.action_result, actions)
+        self.action_list = ActionListWidget(self, actions)
 
         # Main widget that holds the layout
         self.central_widget = QWidget()
@@ -73,6 +74,6 @@ if __name__ == "__main__":
     get_full_data()
 
     app = QApplication([])
-    window = ViewerMainWindow(actions=[ AllProblemAction(), RandomProblemAction() ])
+    window = ViewerMainWindow(actions=[ AllProblemAction(), RandomProblemAction(), SimilarProblemAction() ])
     window.show()
     app.exec()

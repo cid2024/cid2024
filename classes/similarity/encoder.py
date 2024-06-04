@@ -30,9 +30,18 @@ def get_parameters(problem):
     
     answer = json.loads(meta.get_attribute("answer_grading"))[0]
 
+    if len(selections) > 0:
+        try:
+            int(answer)
+        except:
+            return None, None, None
+
     return description, selections, answer
 
 def encode (description, selections, answer):
+    if description == None or selections == None or answer == None:
+        return None
+
     handler = AiHandler()
     
     prompt = get_settings()["similarity_util_translate"]
