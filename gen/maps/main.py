@@ -74,11 +74,14 @@ def draw_map(query_list, points=False):
       print(f"Error in query {query}: No result from Nominatim.")
     else:
       print("Received query: " + query)
-      features.append({"id": id, "type": "Feature", "geometry": geometry[0]['geojson'], "properties": {"name": query}})
+      if points:
+        features.append({"id": id, "type": "Feature", "geometry": {"type": "Point", "coordinates": [geometry[0]['lon'], geometry[0]['lat']]}, "properties": {"name": query}})
+      else:
+        features.append({"id": id, "type": "Feature", "geometry": geometry[0]['geojson'], "properties": {"name": query}})
       id += 1
   if points:
     display_features({"type": "FeatureCollection", "features": translate_to_points(features)})
   else:
     display_features({"type": "FeatureCollection", "features": features})
 
-draw_map(["중국", "러시아", "이란", "미국"], True)
+draw_map(["말레이시아", "미국", "영국", "베트남"], True)
