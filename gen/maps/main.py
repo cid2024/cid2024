@@ -97,4 +97,4 @@ def draw_map(query_list, points=False, annotated=False):
   else:
     display_features({"type": "FeatureCollection", "features": features}, points, annotated)
 
-draw_map(["수마트라 섬", "루손 섬", "팔라완 섬", "보르네오 섬"], False, True)
+draw_map(["북인도양","인도양"], False, True)
