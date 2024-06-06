@@ -167,4 +167,5 @@ cython_debug/
 
 
 # Local test result files
-*.png
+conversation_image.png
+geojson_map.png

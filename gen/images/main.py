@@ -3,6 +3,9 @@ from PIL import Image, ImageFont, ImageDraw
 
 dirname = os.path.dirname(__file__)
 
+WIDTH, HEIGHT = 720, 240
+TH_WIDTH, TH_HEIGHT = 114, 210
+
 def conversation_image(people, statements, genders):
   assert("Length of arrays 'people', 'statements', and 'genders' must be same" and len(people) == len(statements) and len(people) == len(genders))
 
@@ -18,19 +21,19 @@ def conversation_image(people, statements, genders):
     if mcnt > 3 or fcnt > 3:
       raise Exception("Too many people!")
   for persona in personas:
-    persona.thumbnail((120, 180))
+    persona.thumbnail((TH_WIDTH, TH_HEIGHT))
   
-  image = Image.new('RGB', (720, 240 * len(people)), (255, 255, 255))
+  image = Image.new('RGB', (WIDTH, HEIGHT * len(people)), (255, 255, 255))
 
   for i in range(len(people)):
-    image.paste(personas[i], (30, 240*i + 15), mask=personas[i])
     draw = ImageDraw.Draw(image)
     pfont = ImageFont.truetype(os.path.join(dirname, "./SDMiSaeng.ttf"), 20)
     tfont = ImageFont.truetype(os.path.join(dirname, "./SDMiSaeng.ttf"), 30)
     _, _, pw, ph = draw.textbbox((0, 0), people[i], font=pfont)
-    draw.text((75 - pw/2, 240*i + 205 - ph/2), people[i], (0, 0, 0), font=pfont)
     _, _, _, th = draw.textbbox((0, 0), statements[i], font=tfont)
-    draw.text((180, 240*i + 120 - th/2), statements[i], (0, 0, 0), font=tfont)
+    image.paste(personas[i], (int((WIDTH/4 - TH_WIDTH)/2), 240*i + int((HEIGHT - TH_HEIGHT - ph)/2)), mask=personas[i])
+    draw.text((int(WIDTH/8 - pw/2), 240*i + int((HEIGHT + TH_HEIGHT - ph)/2)), people[i], (0, 0, 0), font=pfont)
+    draw.text((int(3*WIDTH/8 - TH_WIDTH/2), 240*i + int(HEIGHT/2 - th/2)), statements[i], (0, 0, 0), font=tfont)
 
   image.save("./conversation_image.png")
 
