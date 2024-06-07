@@ -1,6 +1,7 @@
 import sys
 from functools import partial
-from PyQt6.QtWidgets import QListWidget, QVBoxLayout, QWidget, QLabel, QPushButton
+from PyQt6.QtWidgets import QListWidget, QListWidgetItem, QVBoxLayout, QWidget, QLabel, QPushButton
+from PyQt6.QtGui import QBrush, QColor
 from PyQt6.QtCore import Qt
 
 class ListWidget(QWidget):
@@ -46,7 +47,18 @@ class ListWidget(QWidget):
         self.list_widget.clear()
         self.label_to_item = {}
 
-    def add_item(self, label, item):
-        self.list_widget.addItem(label)
-        self.label_to_item[label] = item
+    def add_item(self, entry):
+        if not entry.has_attribute("label") or not entry.has_attribute("data"):
+            return
+        label = entry.get_attribute("label")
+        data = entry.get_attribute("data")
+        item = QListWidgetItem(label)
+        self.label_to_item[label] = data
+
+        if entry.has_attribute("color"):
+            color = entry.get_attribute("color")
+            item.setBackground(QBrush(QColor(color)))
+
+        self.list_widget.addItem(item)
+
 

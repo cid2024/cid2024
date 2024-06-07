@@ -8,6 +8,9 @@ import torch
 
 import json
 
+model = None
+tokenizer = None
+
 def get_parameters(problem):
     meta = problem.get_attribute("code")
 
@@ -16,7 +19,7 @@ def get_parameters(problem):
     for piece in json.loads(problem_array):
         typename = piece["type"]
         if (typename == "image"):
-            return None, None, None
+            pass
         else:
             description += piece[typename] + "\n"
     
@@ -32,16 +35,13 @@ def get_parameters(problem):
 
     if len(selections) > 0:
         try:
-            int(answer)
+            answer = selections[int(answer)-1]
         except:
-            return None, None, None
+            pass # Do nothing, 'answer' remains unchanged
 
     return description, selections, answer
 
 def encode (description, selections, answer):
-    if description == None or selections == None or answer == None:
-        return None
-
     handler = AiHandler()
     
     prompt = get_settings()["similarity_util_translate"]
@@ -51,7 +51,7 @@ def encode (description, selections, answer):
             prompt,
             user_vars={
                 "description": description,
-                "answer": selections[int(answer)-1] if len(selections) > 0 else answer
+                "answer": answer
             },
             system_vars=dict(),
         )
@@ -70,11 +70,15 @@ def encode (description, selections, answer):
     )
 
     # Load pre-trained model tokenizer (vocabulary)
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    global tokenizer
+    if tokenizer == None:
+        tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
     # Load pre-trained model (weights)
-    model = BertModel.from_pretrained('bert-base-uncased')
-    model.eval()
+    global model
+    if model == None:
+        model = BertModel.from_pretrained('bert-base-uncased')
+        model.eval()
 
     # Tokenize the text
     inputs = tokenizer(summarized, return_tensors='pt', max_length=512, truncation=True, padding=True)

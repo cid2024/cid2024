@@ -1,5 +1,5 @@
 from classes.viewer.widgets.list_widget import ListWidget
-from classes.viewer.action import Action
+from classes.common.data_entry import DataEntry
 
 class ActionListWidget(ListWidget):
     def __init__(self, main_window, actions):
@@ -9,10 +9,13 @@ class ActionListWidget(ListWidget):
         self.result_widget = main_window.action_result
 
         for action in actions:
-            self.add_item(action.name, action)
+            entry = DataEntry()
+            entry.set_attribute("label", action.name)
+            entry.set_attribute("data", action)
+            self.add_item(entry)
 
     def on_selected(self, button_text, item):
         item.run(self.main_window)
         self.result_widget.clear_list()
-        for result_label, result_item in item.result:
-            self.result_widget.add_item(result_label, result_item)
+        for result in item.result:
+            self.result_widget.add_item(result)

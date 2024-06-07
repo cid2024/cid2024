@@ -1,4 +1,5 @@
 [similarity_util_translate]
+model = "gpt-35"
 temperature = 0.2
 frequency_penalty = 0.1
 system = """\
@@ -6,6 +7,7 @@ You are a kind assistant.
 """
 user = """\
 Please translate following problem to english, between $$$ and $$$.
+If the problem contains symbols like (가), (나), (다), please translate it like (a), (b), (c).
 $$$
 다음 문단은 문제의 지문이다.
 {{ description|trim }}
@@ -16,17 +18,19 @@ $$$
 """
 
 [similarity_util_summary]
+model = "gpt-35"
 temperature = 0.2
 frequency_penalty = 0.1
 system = """\
 You are a kind assistant.
 """
 user = """\
-I have a problem description, and I need you to summarize it in five or fewer sentences while including an explanation about why the answer is correct. Focus on identifying the core issue, highlighting key details, stating the objectives clearly, and providing the reasoning behind the solution, and using simplified language. Here is the problem description:
+I have a problem description, and I need you to summarize it in five or fewer sentences while including an explanation about why the answer is correct. 
+Focus on identifying the core issue, highlighting key details, stating the objectives clearly, and providing the reasoning behind the solution, and using simplified language. 
+Here is the problem description:
 $$$
 {{ problem|trim }}
 $$$
-Please provide the combined summary and explanation.
+Please provide the combined summary and explanation, in a seamless manner without dividing it into separate sections.
 """
-
 

@@ -6,12 +6,14 @@ from settings.db_loader import get_full_data
 
 vectors = None
 
-def evaluate(indices):
+def evaluate(indices, overwrite=False):
     get_vectors()
+    global vectors
     problems = get_full_data()["Problem"]
     for index in indices:
-        problem = problems[index]
-        vectors[index] = encode_problem(problem)
+        if overwrite or index not in vectors:
+            problem = problems[index]
+            vectors[index] = encode_problem(problem)
 
     file_path = os.path.join(os.path.dirname(__file__), "vectors.pkl")
     file = open(file_path, "wb")
@@ -29,7 +31,8 @@ def get_vectors():
         file = open(file_path, "rb")
         vectors = pickle.load(file)
         file.close()
-    else:
+
+    if vectors == None:
         vectors = {}
     
     return vectors
