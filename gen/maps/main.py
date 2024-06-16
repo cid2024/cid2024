@@ -18,13 +18,6 @@ plt.rcParams['axes.unicode_minus'] = False
 
 session = requests.Session()
 session.headers.update({'User-Agent': 'cid2024-01'})
-# HEADERS = {
-#     'User-Agent': (
-#       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-#       "AppleWebKit/537.36 (KHTML, like Gecko) "
-#       "Chrome/124.0.0.0 Safari/537.36"
-#     ),
-# }
 
 
 def kor_ord(idx: int) -> str:
