@@ -16,13 +16,15 @@ logger = get_logger(__name__)
 plt.rcParams['font.family'] = 'Apple SD Gothic Neo'
 plt.rcParams['axes.unicode_minus'] = False
 
-HEADERS = {
-    'User-Agent': (
-      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-      "AppleWebKit/537.36 (KHTML, like Gecko) "
-      "Chrome/124.0.0.0 Safari/537.36"
-    ),
-}
+session = requests.Session()
+session.headers.update({'User-Agent': 'cid2024-01'})
+# HEADERS = {
+#     'User-Agent': (
+#       "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+#       "AppleWebKit/537.36 (KHTML, like Gecko) "
+#       "Chrome/124.0.0.0 Safari/537.36"
+#     ),
+# }
 
 
 def kor_ord(idx: int) -> str:
@@ -31,18 +33,16 @@ def kor_ord(idx: int) -> str:
 
 
 def geocoding(query: str):
-    with requests.get(
+    with session.get(
         url=f"https://nominatim.openstreetmap.org/search?q={query}&format=json&polygon_geojson=1",
-        headers=HEADERS,
     ) as response:
         if response.status_code == 200 and response.json() != []:
             return response.json()
 
     logger.debug("trying query in en...")
     query_en = GoogleTranslator(source='ko', target='en').translate(query)
-    with requests.get(
+    with session.get(
         url=f"https://nominatim.openstreetmap.org/search?q={query_en}&format=json&polygon_geojson=1",
-        headers=HEADERS,
     ) as response:
         if response.status_code == 200:
             if not response.json():
