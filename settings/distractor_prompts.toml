@@ -52,3 +52,201 @@ distractors:
 Answer:
 ```yaml
 """
+
+[distractor_remake_sentence_with_reason_prompt]
+model = "gpt-4o"
+temperature = 0.7
+frequency_penalty = 0.1
+system = """\
+당신은 고등학교 역사와 사회 교과목을 가르치는 교사입니다. 매우 정확하고 박식한 지식을 가지고 있습니다.
+"""
+user = """\
+역사와 사회 시험 문제에서 고등학교 학생들이 헷갈리는 선지를 만들기 위해 아래의 교과서 문장을 다음과 같이 틀린 선지로 바꾸었다.
+
+교과서 문장: {{ correct_sentence|trim }}
+틀린 선지: {{ wrong_sentence|trim }}
+출제 의도: {{ wrong_reason|trim }}
+
+출제 의도를 엄격하게 지키고 제시한 틀린 선지의 문장 틀을 유지하되, 이 문장이 틀렸는지 알아내기 어려울 정도로 감쪽같이 용어를 수정하고 표현을 개선하여 완성도를 높혀라.
+
+다음 Pydantic 정의를 참고하여, $BetterWrongStatement 타입과 일치하는 YAML 객체를 출력하라:
+===
+Class BetterWrongStatement(BaseModel):
+    sentence: str = Field(description="개선한 문장")
+    explanation: str = Field(description="주어진 틀린 선지를 어떻게 개선하였는지 설명")
+===
+
+YAML 객체 예시:
+```yaml
+sentence: |
+  ...
+explanation: |
+  ...
+```
+
+Answer:
+```yaml
+"""
+
+[distractor_history_korean_describe_related_prompt]
+model = "gpt-4o"
+temperature = 0.4
+frequency_penalty = 0.1
+system = """\
+당신은 고등학교 한국사 교과목을 가르치는 교사입니다. 매우 정확하고 박식한 지식을 가지고 있습니다.
+"""
+user = """\
+아래에 주어진 글과 연관된 내용을 상세하게 세 문단 내외로 서술하라.
+한국사에서 역사적 전후 상황을 이해하는 데 도움이 되는 사건이나 인물, 국가나 지역명 등을 포함하여 서술하라.
+
+글:
+===
+{{ context|trim }}
+"""
+
+[distractor_history_korean_gen_sentences_prompt]
+model = "gpt-4o"
+temperature = 0.8
+frequency_penalty = 0.1
+system = """\
+당신은 고등학교 한국사 교과목을 가르치는 교사입니다. 매우 정확하고 박식한 지식을 가지고 있습니다.
+"""
+user = """\
+다음은 교과서에서 발췌한 문단이다:
+
+교과서 문단:
+===
+{{ reference|trim }}
+===
+
+한국사 시험 문제에서 고등학교 학생들이 헷갈리는 선지를 만들기 위해, 다음 문장의 단어를 바꿔서 새로운 문장을 5개 만드시오.
+
+한국사 시험에서 선호하는 문장의 변형 예시로는 다음과 같다:
+* 전쟁명을 비슷한 시기에 발생했던 한국 역사상 외국의 침략으로 인해 발생한 전쟁이나 군사적 충돌로 바꾸기
+* 국가명을 시대를 무시하더라도 지리적으로 비슷한 다른 고대 국가로 바꾸기
+* 왕을 비슷한 시대의 한국의 역대 왕의 이름으로 바꾸기
+* 법과 제도명을 고대 한국에서 시행된 법제나 제도의 이름으로 바꾸기
+* 저서를 고등학교 한국사에서 배우는 책의 이름으로 바꾸기
+
+문장: {{ sentence|trim }}
+
+다음 Pydantic 정의를 참고하여, $Distractor 타입과 일치하는 YAML 객체를 출력하라:
+===
+Class Distractor(BaseModel):
+    sentence: str = Field(description="새로운 문장")
+    explanation: str = Field(description="선지가 학생들을 헷갈리게 하는 이유")
+===
+
+YAML 객체 예시:
+```yaml
+distractors:
+- sentence: |
+    ...
+  explanation: |
+    ...
+...
+```
+
+Answer:
+```yaml
+"""
+
+[distractor_eval_distractors_prompt]
+model = "gpt-4o"
+temperature = 0.2
+frequency_penalty = 0.1
+system = """\
+당신은 고등학교 역사와 사회 교과목을 가르치는 교사입니다. 매우 정확하고 박식한 지식을 가지고 있습니다.
+"""
+user = """\
+다음은 교과서에서 발췌한 문단이다:
+
+교과서 문단:
+===
+{{ reference|trim }}
+===
+
+위 문단의 내용을 바탕으로 시험 문제의 오답 선택지를 만들었다.
+
+오답 선택지:
+===
+{{ distractors|trim }}
+===
+
+오답 선택지는 논란의 여지 없이 명백하게 틀린 내용을 담아야 한다. 즉, 참일 가능성이 없는 내용이어야 한다.
+학생들의 이해도와 지식 수준을 파악할 수 있는 높은 완성도를 가질수록 더 좋은 선택지이다.
+각 오답 선택지에 0~10 사이의 점수를 매겨 완성도를 평가하라. 명백하게 틀린 내용을 담고 있는 오답 선택지로 사용하여 완성도 높은 문제를 만들 수 있을수록 점수가 높다.
+
+다음 Pydantic 정의를 참고하여, $Evaluation 타입과 일치하는 YAML 객체를 출력하라:
+===
+Class Evaluation(BaseModel):
+    index: str = Field(description="주어진 선택지의 번호")
+    score: int = Field(description="오답 선택지로서의 0~10 사이의 점수")
+    explanation: str = Field(description="부여한 점수에 대한 설명")
+===
+
+YAML 객체 예시:
+```yaml
+evaluations:
+- index: ...
+  score: ...
+  explanation: |
+    ...
+...
+```
+
+Answer:
+```yaml
+"""
+
+[distractor_eval_make_sense_prompt]
+model = "gpt-4o"
+temperature = 0.2
+frequency_penalty = 0.1
+system = """\
+당신은 고등학교 역사와 사회 교과목을 가르치는 교사입니다. 매우 정확하고 박식한 지식을 가지고 있습니다.
+"""
+user = """\
+다음은 교과서에서 발췌한 문단이다:
+
+교과서 문단:
+===
+{{ reference|trim }}
+===
+
+위 문단의 내용을 바탕으로 시험 문제의 오답 선택지를 만들었다.
+
+오답 선택지:
+===
+{{ choices|trim }}
+===
+
+각 선택지가 완성된 시험 문제로써 얼마나 합리적이고 좋은지 평가하라.
+
+학생들의 이해도와 지식 수준을 파악할 수 있는 높은 완성도를 가질수록 더 좋은 선택지이다.
+문장의 어감이나 문맥으로부터 거짓임을 너무 쉽게 알 수 있는 경우, 5점 이하의 낮은 점수를 부여하라.
+연도나 수치 등을 아주 세밀하게 알아야하는 너무 어려운 선택지에는 만점을 부여하지 말아야 한다.
+
+각 선택지에 0~10 사이의 점수를 매겨 완성도를 평가하라.
+
+다음 Pydantic 정의를 참고하여, $Evaluation 타입과 일치하는 YAML 객체를 출력하라:
+===
+Class Evaluation(BaseModel):
+    index: str = Field(description="주어진 선택지의 번호")
+    score: int = Field(description="좋은 선택지로서의 0~10 사이의 점수")
+    explanation: str = Field(description="부여한 점수에 대한 설명")
+===
+
+YAML 객체 예시:
+```yaml
+evaluations:
+- index: ...
+  score: ...
+  explanation: |
+    ...
+...
+```
+
+Answer:
+```yaml
+"""
