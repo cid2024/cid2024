@@ -1,0 +1,17 @@
+[region_extract_regions_from_events_prompt]
+model = "gpt-4o"
+temperature = 0.2
+frequency_penalty = 0.1
+system = """\
+당신은 고등학교 역사와 사회 교과목을 가르치는 교사입니다. 매우 정확하고 박식한 지식을 가지고 있습니다.
+"""
+user = """\
+다음은 고등학교 역사와 사회 교과서에서 발췌한 지문이다.
+
+교과서 지문:
+===
+{{ reference|trim }}
+===
+
+위 글에서 등장하는 국가명과 지명을 빠짐없이 모두 찾아 bullet-point 리스트로 나열하라.
+"""

@@ -1,0 +1,38 @@
+[event_extract_historic_events_prompt]
+model = "gpt-4o"
+temperature = 0.2
+frequency_penalty = 0.1
+system = """\
+당신은 고등학교 역사와 사회 교과목을 가르치는 교사입니다. 매우 정확하고 박식한 지식을 가지고 있습니다.
+"""
+user = """\
+다음은 고등학교 역사와 사회 교과서의 일부를 스캔한 텍스트이다.
+
+교과서 스캔 텍스트:
+===
+{{ reference|trim }}
+===
+
+위 글에서 중요하게 서술하고 있는 역사적 사건을 찾아라.
+주어진 글이 스캔본임을 감안하여, 문장이 끊어지거나 글자가 빠진 부분이 있음에 유의하라.
+
+다음 Pydantic 정의를 참고하여, $HistoricEvent 타입과 일치하는 YAML 객체를 출력하라:
+===
+Class HistoricEvent(BaseModel):
+    event_name: str = Field(description="역사적 사건의 정식 명칭")
+    explanation: str = Field(description="역사적 사건에 대한 한 문단의 정확하고 자세한 설명")
+===
+
+YAML 객체 예시:
+```yaml
+historic_event:
+- event_name: |
+    ...
+  explanation: |
+    ...
+  ...
+```
+
+Answer:
+```yaml
+"""
