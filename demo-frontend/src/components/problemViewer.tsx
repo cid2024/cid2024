@@ -1,8 +1,36 @@
 // problemViewer.js
-import { MathpixMarkdown } from "mathpix-markdown-it";
-import React, { useMemo } from "react";
-import { Col, Row } from "./globalStyled";
-const Text = ({ text, align, border, title, disablePink }) => {
+import { useMemo } from "react";
+
+interface TextProps {
+  text: string;
+  align: string;
+  border: string;
+  title: string;
+  disablePink: boolean;
+}
+
+interface ImageProps {
+  url: string;
+  width: number;
+}
+
+interface Problem {
+  type: string;
+  text?: string;
+  align?: string;
+  border?: string;
+  url?: string;
+  math?: string;
+  title?: string;
+}
+
+interface ProblemViewerProps {
+  array: Problem[];
+  width: number;
+  disablePink: boolean;
+}
+
+const Text = ({ text, align, title, disablePink }: TextProps) => {
   const inSide = useMemo(() => {
     const token = text?.split(" ")?.filter((v) => {
       return v;
@@ -64,7 +92,7 @@ const Text = ({ text, align, border, title, disablePink }) => {
         );
       }
     });
-  }, [text]);
+  }, [disablePink, text]);
   return (
     <div
       style={{
@@ -101,10 +129,10 @@ const Text = ({ text, align, border, title, disablePink }) => {
           </span>
         </div>
       )}
-      <Row
+      <div
         style={{
           height: "auto",
-          border: border ? "1px solid black" : "",
+          border: "1px solid black",
           flexWrap: "wrap",
           justifyContent: align,
           width: 600,
@@ -112,14 +140,17 @@ const Text = ({ text, align, border, title, disablePink }) => {
           lineHeight: 1,
           paddingTop: 20,
           paddingBottom: 20,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center"
         }}
       >
         {inSide}
-      </Row>
+      </div>
     </div>
   );
 };
-const Image = ({ url, width }) => {
+const Image = ({ url, width }: ImageProps) => {
   return (
     <img
       src={url}
@@ -132,85 +163,46 @@ const Image = ({ url, width }) => {
     />
   );
 };
-const MathComponent = ({ text, border, title }) => {
+const ProblemViewer = ({ array, width, disablePink }: ProblemViewerProps) => {
   return (
     <div
       style={{
-        position: "relative",
-        paddingTop: title ? 5 : 0,
-        alignItems: "center",
+        height: "auto",
+        width: width,
         display: "flex",
-        width: 600,
-        border: border ? "1px solid black" : "",
-      }}
-    >
-      {title && (
-        <div
-          style={{
-            position: "absolute",
-            top: -5,
-            width: 600,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <span
-            style={{
-              backgroundColor: "white",
-              display: "flex",
-              width: "auto",
-              height: 20,
-              lineHeight: 1,
-              verticalAlign: "sub",
-            }}
-          >
-            {"<"}
-            {title}
-            {">"}
-          </span>
-        </div>
-      )}
-      <MathpixMarkdown text={text} alignMathBlock="start" padding={0} />
-    </div>
-  );
-};
-const ProblemViewer = ({ array, width, disablePink }) => {
-  return (
-    <Col style={{ height: "auto", width: width }}>
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center"
+      }}>
       {array.map((v, idx) => {
         const { type, text, align, border, url, math, title } = v;
         if (type === "math") {
           return (
-            <MathComponent
+            <Text
               key={idx}
-              text={removeNewlinesInMath(math)}
-              border={border}
-              title={title}
+              text={math ? math : ""}
+              border={border ? border : ""}
+              title={title ? title: ""}
+              align={""}
+              disablePink={false}
             />
           );
         } else if (type === "image") {
-          return <Image key={"image" + idx} width={600} url={url} />;
+          return <Image key={"image" + idx} width={600} url={url ? url : ""} />;
         } else {
           return (
             <Text
-              align={align}
+              align={align ? align : ""}
               key={"text" + idx}
-              border={border}
+              border={border ? border : ""}
               text={text || ""}
-              title={title}
+              title={title ? title : ""}
               disablePink={disablePink}
             />
           );
         }
       })}
-    </Col>
+    </div>
   );
 };
 export default ProblemViewer;
-function removeNewlinesInMath(input) {
-  input.split("//g");
-  let output = input.replace(/\\[\n\s]*\(/g, "\\(");
-  output = output.replace(/\\[\n\s]*\)/g, "\\)");
-  return output;
-}
