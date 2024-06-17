@@ -1,76 +1,72 @@
-import asyncio
 import pprint
 from dataclasses import dataclass
-from random import random, randint
+from random import randint
 
-from gen.distractor import gen_distractors, DistractorInfo
-from gen.extractor import extract_key_sentences
+from gen.distractor import gen_distractors
+from gen.distractor.evaluate import evaluate_distractor
+from gen.distractor.generate import ImprovedDistractorInfo, improve_distractor, DistractorInfo
+from gen.extractor import extract_key_sentences, KeySentence
 from llm.ai_handler import AiHandler
-from llm.utils import run_prompt
-from settings.config_loader import get_settings
 from settings.textbook_loader import get_textbook
-from util.parse import parse_llm_yaml
 
 
 @dataclass(kw_only=True)
-class DistractorScore:
-    index: int
-    score: int
-    reason: str
+class ChoiceStatement:
+    correct_text: str
+    wrong_text: str
+    wrong_reason: str
 
 
-def evaluate_distractor(
+def gen_choice_statements(
         handler: AiHandler,
         reference: str,
-        distractors: list[DistractorInfo],
-) -> list[DistractorScore]:
-    prompt = get_settings()["abcselect_eval_distractors_prompt"]
-    response = asyncio.run(
-        run_prompt(
-            handler,
-            prompt,
-            user_vars={
-                "reference": reference,
-                "distractors": (
-                    "\n\n".join([
-                        f"선택지 {chr(ord('A') + idx)}) {distractor.distractor}\n"
-                        f"출제 의도: {distractor.reason}"
-                        for idx, distractor in enumerate(distractors)
-                    ])
-                ),
-            },
-            system_vars=dict(),
-        )
-    )
+        choice_num: int,
+) -> list[tuple[str, list[ChoiceStatement]]]:
+    ret: list[tuple[str, list[ChoiceStatement]]] = []
 
-    try:
-        data = parse_llm_yaml(response)["evaluations"]
+    key_sentences = extract_key_sentences(handler, reference, int(choice_num * 1.5))
+    for key_sentence in key_sentences:
+        distractors = gen_distractors(handler, key_sentence.sentence)
+        if not distractors:
+            continue
 
-        ret: list[DistractorScore] = []
+        improved_distractors: list[ImprovedDistractorInfo] = []
+        for distractor in distractors.distractors:
+            improved_distractor = improve_distractor(handler, key_sentence.sentence, distractor)
+            if improved_distractor:
+                improved_distractors.append(improved_distractor)
 
-        for item in data:
-            idx = item.get("index", "").strip()
-            if 1 != len(idx) or not (ord('A') <= ord(idx) <= ord('Z')):
-                continue
-            idx = ord(idx) - ord('A')
-            if idx < 0 or idx >= len(distractors):
-                continue
+        mock_distractors = [
+            DistractorInfo(
+                distractor=improved_distractor.improved_distractor,
+                reason=improved_distractor.improved_reason,
+            )
+            for improved_distractor in improved_distractors
+        ]
 
-            score = 0
-            try:
-                score = int(item.get("score", 0))
-                score = max(0, min(10, score))
-            except:
-                score = 0
+        distractor_scores = evaluate_distractor(handler, distractors.rag_context, mock_distractors)
 
-            reason = item.get("explanation", "").strip()
+        indices = [
+            idx
+            for idx, distractor_score in enumerate(distractor_scores)
+            if 9 <= distractor_score.accuracy_score and 8 <= distractor_score.sense_score
+        ]
+        indices.sort(key=lambda x: distractor_scores[x].accuracy_score + distractor_scores[x].sense_score, reverse=True)
 
-            if reason:
-                ret.append(DistractorScore(index=idx, score=score, reason=reason))
+        if indices:
+            ret.append((
+                key_sentence.keyword,
+                [
+                    ChoiceStatement(
+                        correct_text=key_sentence.sentence,
+                        wrong_text=mock_distractors[idx].distractor,
+                        wrong_reason=mock_distractors[idx].reason,
+                    )
+                    for idx in indices
+                ],
+            ))
 
-        return ret
-    except:
-        return []
+    return ret
 
 
 if __name__ == "__main__":
@@ -78,56 +74,9 @@ if __name__ == "__main__":
 
     handler = AiHandler()
 
-    textbook = get_textbook("korean")
+    page = 180
+    reference = get_textbook("korean")[page: page+3]
+    expected_num = 4
 
-    for i in range(len(textbook)):
-        print(i, textbook[i][:50])
-
-    n = 123
-
-    keys = extract_key_sentences(handler, '\n'.join(textbook[n:n+3]), 7)
-
-    pp.pprint(keys)
-
-    data = []
-
-    for key in keys:
-        gen_distrs_ret = gen_distractors(handler, key.sentence)
-
-        if gen_distrs_ret:
-            scores = evaluate_distractor(handler, gen_distrs_ret.rag_context, gen_distrs_ret.distractors)
-
-            data.append((key, gen_distrs_ret, scores))
-
-    pp.pprint(data)
-
-    fuck = []
-
-    for i in range(len(data)):
-        key, gen_distrs_ret, scores = data[i]
-        scores = [s for s in scores if s.score >= 9]
-
-        if scores and random() < 0.6:
-            j = randint(0, len(scores) - 1)
-            j = scores[j].index
-
-            fuck.append((
-                gen_distrs_ret.distractors[j].distractor,
-                "Wrong bitch",
-                key.sentence,
-                gen_distrs_ret.distractors[j].reason,
-            ))
-        else:
-            fuck.append((
-                key.sentence,
-                "Correct",
-                None,
-                None,
-            ))
-
-    for i in range(len(fuck)):
-        print("가나다라마바사아자차"[i] + ")", fuck[i][0])
-
-    print("\n" * 10)
-
-    pp.pprint(fuck)
+    choice_statements = gen_choice_statements(handler, reference, expected_num)
+    pp.pprint(choice_statements)

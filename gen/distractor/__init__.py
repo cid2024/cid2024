@@ -1,4 +1,4 @@
-from gen.distractor.main import gen_distractors, DistractorInfo
+from gen.distractor.generate import gen_distractors, DistractorInfo
 
 __all__ = [
     "gen_distractors",
