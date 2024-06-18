@@ -24,21 +24,25 @@ def commit_db():
     handler = AiHandler()
 
     for textbook_name in [
-        "eastasia",
+        # "eastasia",
         "korean",
-        "world",
+        # "world",
     ]:
         textbook = list(map(str, filter(None, get_textbook(textbook_name))))
         n_pages = len(textbook)
-        if n_pages < 3:
+        if n_pages < 5:
             continue
 
         textbook_data: list[ReferenceRecord] = []
 
-        run_cnt = 0
-        for page in range(0, n_pages - 2, 2):
-            reference = '\n'.join(textbook[page: page+3])
-            key_sentences = extract_key_sentences(handler, reference, 7)
+        file_path = f"gen_distractors_data__{textbook_name}.56.pkl.final"
+        with open(file_path, 'rb') as f:
+            textbook_data = pickle.load(f)
+
+        run_cnt = 56
+        for page in range(115, n_pages - 4, 4):
+            reference = '\n'.join(textbook[page: page+5])
+            key_sentences = extract_key_sentences(handler, reference, 8)
             for key_sentence in key_sentences:
                 distractors = gen_distractors(handler, key_sentence.sentence)
                 if not distractors:
