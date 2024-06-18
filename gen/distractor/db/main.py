@@ -1,6 +1,7 @@
 import pickle
 import pprint
 from dataclasses import dataclass
+from pathlib import Path
 
 from gen.distractor import gen_distractors
 from gen.distractor.evaluate import evaluate_distractor, DistractorScore
@@ -18,6 +19,26 @@ class ReferenceRecord:
     orig_distractors_data: GenDistractorsRet
     improved_distractors: list[ImprovedDistractorInfo]
     improved_distractor_scores: list[DistractorScore]
+
+
+eastasia_records: list[ReferenceRecord] = []
+korean_records: list[ReferenceRecord] = []
+world_records: list[ReferenceRecord] = []
+
+
+def load_db():
+    global eastasia_records, korean_records, world_records
+
+    parent_dir = Path(__file__).resolve().parent
+
+    with open(parent_dir / "gen_distractors_data__eastasia.pkl.final", 'rb') as f:
+        eastasia_records = pickle.load(f)
+
+    with open(parent_dir / "gen_distractors_data__korean.pkl.final", 'rb') as f:
+        korean_records = pickle.load(f)
+
+    with open(parent_dir / "gen_distractors_data__world.pkl.final", 'rb') as f:
+        world_records = pickle.load(f)
 
 
 def commit_db():
@@ -87,10 +108,8 @@ def commit_db():
 
 
 if __name__ == "__main__":
-    # pp = pprint.PrettyPrinter(indent=4)
+    pp = pprint.PrettyPrinter(indent=4)
 
-    commit_db()
+    load_db()
 
-    # with open("gen_distractors_data__korean.pkl", 'rb') as f:
-    #     data = pickle.load(f)
-    #     pp.pprint(data)
+    pp.pprint(korean_records)
