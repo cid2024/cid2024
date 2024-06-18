@@ -167,3 +167,8 @@ cython_debug/
 ._.DS_Store
 **/.DS_Store
 **/._.DS_Store
+
+
+# Local test result files
+conversation_image.png
+geojson_map.png

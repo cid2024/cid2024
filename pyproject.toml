@@ -15,6 +15,10 @@ nltk = "^3.8.1"
 sense2vec = "^2.0.2"
 torch = "^2.3.0"
 scikit-learn = "^1.5.0"
+deep-translator = "^1.11.4"
+geopandas = "^0.14.4"
+contextily = "^1.6.0"
+pillow = "^10.3.0"
 
 [tool.poetry.group.dev.dependencies]
 openai = "^1.16.2"
