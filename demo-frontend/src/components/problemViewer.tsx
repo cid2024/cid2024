@@ -153,7 +153,7 @@ const Text = ({ text, align, title, disablePink }: TextProps) => {
 const Image = ({ url, width }: ImageProps) => {
   return (
     <img
-      src={url.includes(".") ? url : `data:image/jpeg;base64,${url}`}
+      src={url.includes(".") ? url : `data:image/jpeg;base64,${url}`} // url if contains '.', else base64
       // https://img-cf.kurly.com/shop/data/goodsview/20201012/gv10000126356_1.jpg
       style={{
         width: width,
