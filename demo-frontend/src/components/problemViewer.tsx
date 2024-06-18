@@ -4,7 +4,7 @@ import { useMemo } from "react";
 interface TextProps {
   text: string;
   align: string;
-  border: boolean;
+  border?: boolean;
   title: string;
   disablePink: boolean;
 }
@@ -30,7 +30,7 @@ interface ProblemViewerProps {
   disablePink: boolean;
 }
 
-const Text = ({ text, align, title, disablePink }: TextProps) => {
+const Text = ({ text, align, border, title, disablePink }: TextProps) => {
   const inSide = useMemo(() => {
     const token = text?.split(" ")?.filter((v) => {
       return v;
@@ -132,7 +132,7 @@ const Text = ({ text, align, title, disablePink }: TextProps) => {
       <div
         style={{
           height: "auto",
-          border: "1px solid black",
+          border: border ? "1px solid black" : "",
           flexWrap: "wrap",
           justifyContent: align,
           width: 600,
