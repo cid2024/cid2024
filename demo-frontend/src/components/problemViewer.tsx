@@ -4,7 +4,7 @@ import { useMemo } from "react";
 interface TextProps {
   text: string;
   align: string;
-  border: string;
+  border: boolean;
   title: string;
   disablePink: boolean;
 }
@@ -18,7 +18,7 @@ interface Problem {
   type: string;
   text?: string;
   align?: string;
-  border?: string;
+  border?: boolean;
   url?: string;
   math?: string;
   title?: string;
@@ -141,7 +141,7 @@ const Text = ({ text, align, title, disablePink }: TextProps) => {
           paddingTop: 20,
           paddingBottom: 20,
           display: "flex",
-          flexDirection: "column",
+          flexDirection: "row",
           alignItems: "center"
         }}
       >
@@ -153,7 +153,7 @@ const Text = ({ text, align, title, disablePink }: TextProps) => {
 const Image = ({ url, width }: ImageProps) => {
   return (
     <img
-      src={url}
+      src={url.includes(".") ? url : `data:image/jpeg;base64,${url}`}
       // https://img-cf.kurly.com/shop/data/goodsview/20201012/gv10000126356_1.jpg
       style={{
         width: width,
@@ -170,7 +170,7 @@ const ProblemViewer = ({ array, width, disablePink }: ProblemViewerProps) => {
         height: "auto",
         width: width,
         display: "flex",
-        flexDirection: "row",
+        flexDirection: "column",
         justifyContent: "center",
         alignItems: "center"
       }}>
@@ -181,7 +181,7 @@ const ProblemViewer = ({ array, width, disablePink }: ProblemViewerProps) => {
             <Text
               key={idx}
               text={math ? math : ""}
-              border={border ? border : ""}
+              border={border ? border : false}
               title={title ? title: ""}
               align={""}
               disablePink={false}
@@ -194,7 +194,7 @@ const ProblemViewer = ({ array, width, disablePink }: ProblemViewerProps) => {
             <Text
               align={align ? align : ""}
               key={"text" + idx}
-              border={border ? border : ""}
+              border={border ? border : false}
               text={text || ""}
               title={title ? title : ""}
               disablePink={disablePink}
