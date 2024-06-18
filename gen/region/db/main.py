@@ -1,10 +1,24 @@
 import asyncio
 import pprint
+from pathlib import Path
 
 import gen.event.db.main as event_db
 from llm.ai_handler import AiHandler
 from llm.utils import run_prompt
 from settings.config_loader import get_settings
+
+
+region_names: list[str] = []
+
+
+def load_db() -> None:
+    global region_names
+
+    parent_dir = Path(__file__).resolve().parent
+    with open(parent_dir / "names.txt", "r") as f:
+        region_names = f.read().split("\n")
+
+    region_names = sorted(list(set(filter(None, map(str, region_names)))))
 
 
 def prev_gather():
@@ -61,6 +75,10 @@ def prev_text():
 if __name__ == "__main__":
     pp = pprint.PrettyPrinter(indent=4)
 
+    load_db()
+
+    pp.pprint(region_names)
+
     event_db.load_db()
 
     events = (
@@ -69,7 +87,7 @@ if __name__ == "__main__":
         + event_db.world_historic_events
     )
 
-    keyword = "시마네현"
+    keyword = region_names[15]
 
     for event in events:
         if keyword in (event.name + " " + event.explanation):
