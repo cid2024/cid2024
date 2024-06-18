@@ -57,13 +57,25 @@ def encode (description, selections, answer):
         )
     )
 
-    prompt = get_settings()["similarity_util_summary"]
-    summarized = asyncio.run(
+    prompt = get_settings()["similarity_util_explain"]
+    explanation = asyncio.run(
         run_prompt(
             handler,
             prompt,
             user_vars={
                 "problem": translated_problem,
+            },
+            system_vars=dict(),
+        )
+    )
+
+    prompt = get_settings()["similarity_util_keyword"]
+    keywords = asyncio.run(
+        run_prompt(
+            handler,
+            prompt,
+            user_vars={
+                "passage": explanation
             },
             system_vars=dict(),
         )
@@ -81,7 +93,7 @@ def encode (description, selections, answer):
         model.eval()
 
     # Tokenize the text
-    inputs = tokenizer(summarized, return_tensors='pt', max_length=512, truncation=True, padding=True)
+    inputs = tokenizer(keywords, return_tensors='pt', max_length=512, truncation=True, padding=True)
 
     # Get the hidden states from BERT
     with torch.no_grad():
