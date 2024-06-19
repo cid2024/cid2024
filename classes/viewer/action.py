@@ -3,5 +3,5 @@ class Action:
         self.name = name
         self.result = []
 
-    def run(self):
+    def run(self, main_window = None):
         pass

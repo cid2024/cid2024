@@ -19,6 +19,8 @@ deep-translator = "^1.11.4"
 geopandas = "^0.14.4"
 contextily = "^1.6.0"
 pillow = "^10.3.0"
+flask = "^3.0.3"
+flask-cors = "^4.0.1"
 
 [tool.poetry.group.dev.dependencies]
 openai = "^1.16.2"

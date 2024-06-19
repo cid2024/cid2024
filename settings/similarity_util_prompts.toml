@@ -1,0 +1,46 @@
+[similarity_util_translate]
+model = "gpt-35"
+temperature = 0.2
+frequency_penalty = 0.1
+system = """\
+You are a kind assistant.
+"""
+user = """\
+Please translate following problem to english, between $$$ and $$$.
+If the problem contains symbols like (가), (나), (다), please translate it like (a), (b), (c).
+$$$
+{{ problem|trim }}
+$$$
+"""
+
+[similarity_util_explain]
+model = "gpt-35"
+temperature = 0.2
+frequency_penalty = 0.1
+system = """\
+You are a kind assistant.
+"""
+user = """\
+Summarize following passage focusing on what social or historical topic does the problem mainly asking for, in five or less sentences.
+$$$
+{{ problem|trim }}
+$$$
+"""
+
+[similarity_util_keyword]
+model = "gpt-35"
+temperature = 0.2
+frequency_penalty = 0.1
+system = """\
+You are a kind assistant.
+"""
+user = """\
+In following passage, pick 10 or less keywords focusing about the main topic of the passage.
+You should not include "problem" as the keyword.
+Please print keywords in one line, separated with single space, without any unrequired symbols, and without any additional explanation.
+Here is the passage:
+$$$
+{{ passage|trim }}
+$$$
+"""
+
