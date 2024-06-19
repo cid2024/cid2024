@@ -3,16 +3,16 @@ from llm.ai_handler import AiHandler
 from llm.utils import run_prompt
 from settings.config_loader import get_settings
 from classes.common.textify import textify_mise, textify_gen
+from classes.common.data_entry import DataEntry
+from bank.models import Problem
 
 from transformers import BertTokenizer, BertModel
 import torch
 
-import json
-
 model = None
 tokenizer = None
 
-def encode (problem_text):
+def encode (problem_text:str) -> torch.Tensor:
     handler = AiHandler()
     
     prompt = get_settings()["similarity_util_translate"]
@@ -77,8 +77,8 @@ def encode (problem_text):
 
     return sentence_vector.flatten()
 
-def encode_mise (problem):
+def encode_mise (problem:DataEntry) -> torch.Tensor:
     return encode(textify_mise(problem))
 
-def encode_gen (problem):
+def encode_gen (problem:Problem) -> torch.Tensor:
     return encode(textify_gen(problem))
