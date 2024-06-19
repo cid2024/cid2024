@@ -11,9 +11,9 @@ def get_user_skill(history):
     for problem, correct in history:
         dif = difficulty_gen(problem)
         if correct:
-            user_skill = max(user_skill, dif) + 1
+            user_skill = min(max(user_skill, dif) + 1, 10)
         else:
-            user_skill = min(user_skill, dif) - 1
+            user_skill = max(min(user_skill, dif) - 1, 0)
     return user_skill
 
 # Get recommended problem.
@@ -24,12 +24,15 @@ def recommend_problem (history:list[tuple[Problem, bool]], problem_pool:list[Pro
     tried_pid = set([record[0].id for record in history])
 
     if problem_pool == None:
-        all_problems = list(get_problems_dict.values())
-        problem_pool = [ problem for problem in all_problems if problem.id not in tried_pid ]
+        problem_pool = list(get_problems_dict().values())
 
-    problem_pool = [ problem for problem in problem_pool if abs(difficulty_gen(problem) - user_skill) <= 2 ]
+    # Filter problems already in history
+    problem_pool = [ problem for problem in problem_pool if problem.id not in tried_pid ]
 
-    user_skill = get_user_skill(history)
+    # Try to filter problems by user skill
+    user_skill_pool = [ problem for problem in problem_pool if abs(difficulty_gen(problem) - user_skill) <= 1 ]
+    if len(user_skill_pool) > 0:
+        problem_pool = user_skill_pool
 
     (last_problem, last_problem_correct) = history[-1]
 
