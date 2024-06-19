@@ -3,35 +3,12 @@ from llm.ai_handler import AiHandler
 from llm.utils import run_prompt
 from settings.config_loader import get_settings
 from classes.common.textify import textify_mise, textify_gen
+from classes.common.data_entry import DataEntry
+from bank.models import Problem
 import re
 
 import os
 import pickle
-
-def difficulty (problem_text):
-    handler = AiHandler()
-    prompt = get_settings()["difficulty_eval"]
-    result = asyncio.run(
-        run_prompt(
-            handler,
-            prompt,
-            user_vars={
-                "problem": problem_text
-            },
-            system_vars=dict(),
-        )
-    )
-
-    pattern = r"%%%(\d+)%%%"
-    match = re.search(pattern, result)
-
-    if match:
-        return int(match.group(1))
-    else:
-        return 0
-
-def difficulty_mise (problem):
-    return difficulty(textify_mise(problem))
 
 difficulties = None
 
@@ -63,6 +40,31 @@ def evaluate(problem, overwrite = False):
     pickle.dump(difficulties, file)
     file.close()
 
-def difficulty_gen (problem):
+def difficulty (problem_text: str) -> int:
+    handler = AiHandler()
+    prompt = get_settings()["difficulty_eval"]
+    result = asyncio.run(
+        run_prompt(
+            handler,
+            prompt,
+            user_vars={
+                "problem": problem_text
+            },
+            system_vars=dict(),
+        )
+    )
+
+    pattern = r"%%%(\d+)%%%"
+    match = re.search(pattern, result)
+
+    if match:
+        return int(match.group(1))
+    else:
+        return 0
+
+def difficulty_mise (problem: DataEntry) -> int:
+    return difficulty(textify_mise(problem))
+
+def difficulty_gen (problem: Problem) -> int:
     evaluate(problem)
     return difficulties[problem.id]
