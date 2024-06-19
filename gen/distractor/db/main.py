@@ -1,6 +1,7 @@
 import pickle
 import pprint
 from dataclasses import dataclass
+from pathlib import Path
 
 from gen.distractor import gen_distractors
 from gen.distractor.evaluate import evaluate_distractor, DistractorScore
@@ -20,25 +21,49 @@ class ReferenceRecord:
     improved_distractor_scores: list[DistractorScore]
 
 
+eastasia_records: list[ReferenceRecord] = []
+korean_records: list[ReferenceRecord] = []
+world_records: list[ReferenceRecord] = []
+
+
+def load_db():
+    global eastasia_records, korean_records, world_records
+
+    parent_dir = Path(__file__).resolve().parent
+
+    with open(parent_dir / "gen_distractors_data__eastasia.pkl.final", 'rb') as f:
+        eastasia_records = pickle.load(f)
+
+    with open(parent_dir / "gen_distractors_data__korean.pkl.final", 'rb') as f:
+        korean_records = pickle.load(f)
+
+    with open(parent_dir / "gen_distractors_data__world.pkl.final", 'rb') as f:
+        world_records = pickle.load(f)
+
+
 def commit_db():
     handler = AiHandler()
 
     for textbook_name in [
-        "eastasia",
+        # "eastasia",
         "korean",
-        "world",
+        # "world",
     ]:
         textbook = list(map(str, filter(None, get_textbook(textbook_name))))
         n_pages = len(textbook)
-        if n_pages < 3:
+        if n_pages < 5:
             continue
 
         textbook_data: list[ReferenceRecord] = []
 
-        run_cnt = 0
-        for page in range(0, n_pages - 2, 2):
-            reference = '\n'.join(textbook[page: page+3])
-            key_sentences = extract_key_sentences(handler, reference, 7)
+        file_path = f"gen_distractors_data__{textbook_name}.56.pkl.final"
+        with open(file_path, 'rb') as f:
+            textbook_data = pickle.load(f)
+
+        run_cnt = 56
+        for page in range(115, n_pages - 4, 4):
+            reference = '\n'.join(textbook[page: page+5])
+            key_sentences = extract_key_sentences(handler, reference, 8)
             for key_sentence in key_sentences:
                 distractors = gen_distractors(handler, key_sentence.sentence)
                 if not distractors:
@@ -83,10 +108,8 @@ def commit_db():
 
 
 if __name__ == "__main__":
-    # pp = pprint.PrettyPrinter(indent=4)
+    pp = pprint.PrettyPrinter(indent=4)
 
-    commit_db()
+    load_db()
 
-    # with open("gen_distractors_data__korean.pkl", 'rb') as f:
-    #     data = pickle.load(f)
-    #     pp.pprint(data)
+    pp.pprint(korean_records)
