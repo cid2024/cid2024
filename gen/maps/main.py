@@ -174,4 +174,5 @@ def draw_map(query_list: list[str], use_points: bool = False, annotated: bool = 
 
 
 if __name__ == "__main__":
-    draw_map(["북인도양", "인도양"], False, True)
+    # draw_map(["북인도양", "인도양"], False, True)
+    draw_map(["티베트고원", "청나라"], False, True)

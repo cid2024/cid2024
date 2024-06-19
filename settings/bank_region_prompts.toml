@@ -1,0 +1,83 @@
+[bank_region_distractors_prompt]
+model = "gpt-4o"
+temperature = 0.4
+frequency_penalty = 0.1
+system = """\
+당신은 고등학교 역사와 사회 교과목을 가르치는 교사입니다. 매우 정확하고 박식한 지식을 가지고 있습니다.
+"""
+user = """\
+다음은 고등학교 역사와 사회 시험 문제의 지문이다.
+
+시험 문제 지문:
+===
+{{ statement|trim }}
+===
+
+위 글에서 모든 빈칸 "(___)"에는 동일한 지명 혹은 국명이 들어간다.
+시험을 응시하는 학생들이 이 문제의 답안으로 제출할 법한 답을 제시하라.
+
+학생들이 제시할 수 있는 다양한 오답을 예측하여, 정확하게 네 개를 제시하라.
+제시하는 지명이나 국명은 실제로 존재하는 올바른 명칭이라야 한다.
+
+다음 Pydantic 정의를 참고하여, $Place 타입과 일치하는 YAML 객체를 출력하라:
+===
+Class Place(BaseModel):
+    kor_name: str = Field(description="학생들이 제시할 법한 지명 혹은 국명을 한국어로 적은 것")
+    eng_name: str = Field(description="해당 지명 혹은 국명의 정식 명칭을 영어로 적은 것")
+===
+
+YAML 객체 예시:
+```yaml
+place:
+- kor_name: ...
+  eng_name: ...
+  ...
+```
+
+Answer:
+```yaml
+"""
+
+[bank_region_multiple_answer_check_prompt]
+model = "gpt-4o"
+temperature = 0.2
+frequency_penalty = 0.1
+system = """\
+당신은 고등학교 역사와 사회 교과목을 가르치는 교사입니다. 매우 정확하고 박식한 지식을 가지고 있습니다.
+"""
+user = """\
+다음은 고등학교 역사와 사회 시험 문제의 지문이다.
+
+시험 문제 지문:
+===
+{{ statement|trim }}
+===
+
+위 글에서 모든 빈칸 "(___)"에는 동일한 지명 혹은 국명이 들어간다.
+
+이 문제의 정답이 "{{ answer|trim }}"으로 유일한지, 아니면 다른 정답이 가능할 수 있는지 판단하라.
+정답으로 제시하는 지명이나 국명은 실제로 존재하는 올바른 명칭이라야 한다.
+
+다음 Pydantic 정의를 참고하여, $Answer 타입과 일치하는 YAML 객체를 출력하라:
+===
+Class Answer(BaseModel):
+    kor_name: str = Field(description="정답이 될 수 있는 지명 혹은 국명을 한국어로 적은 것")
+    eng_name: str = Field(description="해당 지명 혹은 국명의 정식 명칭을 영어로 적은 것")
+    explanation: str = Field(description="이 답이 왜 정답인지에 대한 설명")
+===
+
+YAML 객체 예시:
+```yaml
+answer:
+- kor_name: |
+    ...
+  eng_name: |
+    ...
+  explanation: |
+    ...
+  ...
+```
+
+Answer:
+```yaml
+"""
