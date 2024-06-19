@@ -132,12 +132,99 @@ def load_db_distractors() -> None:
         region_blank_distractors = pickle.load(f)
 
 
+@dataclass(kw_only=True)
+class RegionBlankPossibleAnswer:
+    name: str
+    en_name: str
+    explanation: str
+
+
+@dataclass(kw_only=True)
+class RegionBlankRecord:
+    problem: models.Problem
+    distractors: list[RegionBlankDistractor]
+    possible_answers: list[RegionBlankPossibleAnswer]
+
+
+def commit_db_possible_records() -> None:
+    handler = AiHandler()
+    prompt = get_settings()["bank_region_multiple_answer_check_prompt"]
+
+    region_blank_records: list[RegionBlankRecord] = []
+
+    for idx, (problem, distractors) in enumerate(region_blank_distractors):
+        print("@" * 10, idx, '/', len(region_blank_distractors))
+
+        region_name = problem.answer
+        possible_answers: list[RegionBlankPossibleAnswer] = []
+
+        response = asyncio.run(
+            run_prompt(
+                handler,
+                prompt,
+                user_vars={
+                    "statement": '\n'.join(map(lambda x: x.data, problem.statement)),
+                    "answer": region_name,
+                },
+                system_vars=dict(),
+            )
+        )
+
+        try:
+            data = parse_llm_yaml(response)["answer"]
+            if isinstance(data, list):
+                for item in data:
+                    kor_name = item.get("kor_name", "").strip()
+                    eng_name = item.get("eng_name", "").strip()
+                    explanation = item.get("explanation", "").strip()
+
+                    if kor_name and eng_name and explanation:
+                        possible_answers.append(
+                            RegionBlankPossibleAnswer(
+                                name=kor_name,
+                                en_name=eng_name,
+                                explanation=explanation,
+                            )
+                        )
+        except:
+            pass
+
+        region_blank_records.append(
+            RegionBlankRecord(
+                problem=problem,
+                distractors=distractors,
+                possible_answers=possible_answers,
+            )
+        )
+
+    # Save ret as pickle.
+    with open("region_blank_possible_records.pickle", "wb") as f:
+        pickle.dump(region_blank_records, f)
+
+
+region_blank_records: list[RegionBlankRecord] = []
+
+
+def load_db_possible_records() -> None:
+    global region_blank_records
+
+    parent_dir = Path(__file__).resolve().parent
+    with open(parent_dir / "region_blank_possible_records.pickle.final", "rb") as f:
+        region_blank_records = pickle.load(f)
+
+
 if __name__ == "__main__":
-    pp = pprint.PrettyPrinter(indent=4)
+    pp = pprint.PrettyPrinter(indent=4, width=120)
 
     event_db.load_db()
     region_db.load_db()
 
-    load_db_distractors()
+    load_db_possible_records()
 
-    pp.pprint(region_blank_distractors)
+    good_records = [
+        record for record in region_blank_records
+        if len(record.possible_answers) <= 2
+    ]
+
+    for record in good_records:
+        pp.pprint(record)
