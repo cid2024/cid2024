@@ -31,9 +31,9 @@ def init_plt() -> None:
     plt.rcParams['axes.unicode_minus'] = False
 
 
-def geocoding(query: str):
+def geocoding_nocache(query: str):
     with session.get(
-        url=f"https://nominatim.openstreetmap.org/search?q={query}&format=json&polygon_geojson=1",
+            url=f"https://nominatim.openstreetmap.org/search?q={query}&format=json&polygon_geojson=1",
     ) as response:
         if response.status_code == 200 and response.json() != []:
             return response.json()
@@ -41,7 +41,7 @@ def geocoding(query: str):
     logger.debug("trying query in en...")
     query_en = GoogleTranslator(source='ko', target='en').translate(query)
     with session.get(
-        url=f"https://nominatim.openstreetmap.org/search?q={query_en}&format=json&polygon_geojson=1",
+            url=f"https://nominatim.openstreetmap.org/search?q={query_en}&format=json&polygon_geojson=1",
     ) as response:
         if response.status_code == 200:
             if not response.json():
@@ -52,6 +52,23 @@ def geocoding(query: str):
 
     logger.error("Error: Cannot fetch response from Nominatim: %d" % response.status_code)
     return None
+
+
+geocoding_cache: dict = {}
+
+
+def geocoding(query: str):
+    global geocoding_cache
+
+    if query in geocoding_cache:
+        return geocoding_cache[query]
+
+    ret = geocoding_nocache(query)
+
+    if ret is not None:
+        geocoding_cache[query] = ret
+
+    return ret
 
 
 def gen_bbox(feature_dict: dict) -> Polygon:
