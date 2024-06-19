@@ -12,6 +12,7 @@ import pickle
 
 difficulties = None
 
+
 def get_difficulties():
     global difficulties
     if difficulties is not None:
@@ -24,12 +25,13 @@ def get_difficulties():
         difficulties = pickle.load(file)
         file.close()
 
-    if difficulties == None:
+    if difficulties is None:
         difficulties = {}
     
     return difficulties
 
-def evaluate(problem, overwrite = False):
+
+def evaluate(problem, overwrite: bool = False):
     get_difficulties()
     global difficulties
     if overwrite or problem.id not in difficulties:
@@ -40,7 +42,8 @@ def evaluate(problem, overwrite = False):
     pickle.dump(difficulties, file)
     file.close()
 
-def difficulty (problem_text: str) -> int:
+
+def difficulty(problem_text: str) -> int:
     handler = AiHandler()
     prompt = get_settings()["difficulty_eval"]
     result = asyncio.run(
@@ -62,9 +65,11 @@ def difficulty (problem_text: str) -> int:
     else:
         return 0
 
-def difficulty_mise (problem: DataEntry) -> int:
+
+def difficulty_mise(problem: DataEntry) -> int:
     return difficulty(textify_mise(problem))
 
-def difficulty_gen (problem: Problem) -> int:
+
+def difficulty_gen(problem: Problem) -> int:
     evaluate(problem)
     return difficulties[problem.id]

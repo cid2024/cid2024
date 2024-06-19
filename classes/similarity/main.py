@@ -6,7 +6,9 @@ from bank.models import Problem
 import os
 import pickle
 
+
 vectors = None
+
 
 def get_vectors():
     global vectors
@@ -20,10 +22,11 @@ def get_vectors():
         vectors = pickle.load(file)
         file.close()
 
-    if vectors == None:
+    if vectors is None:
         vectors = {}
     
     return vectors
+
 
 def evaluate(problem, overwrite = False):
     get_vectors()
@@ -36,13 +39,16 @@ def evaluate(problem, overwrite = False):
     pickle.dump(vectors, file)
     file.close()
 
-def similarity(problem_text1:str, problem_text2:str) -> float:
+
+def similarity(problem_text1: str, problem_text2: str) -> float:
     return vector_similarity(encode(problem_text1), encode(problem_text2))
 
-def similarity_mise(problem1:DataEntry, problem2:DataEntry) -> float:
+
+def similarity_mise(problem1: DataEntry, problem2: DataEntry) -> float:
     return vector_similarity(encode_mise(problem1), encode_mise(problem2))
 
-def similarity_gen(problem1:Problem, problem2:Problem) -> float:
+
+def similarity_gen(problem1: Problem, problem2: Problem) -> float:
     evaluate(problem1)
     evaluate(problem2)
     return vector_similarity(vectors[problem1.id], vectors[problem2.id])

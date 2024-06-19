@@ -6,6 +6,7 @@ from classes.similarity.main import similarity_gen
 
 import random
 
+
 def get_user_skill(history):
     user_skill = 0
     for problem, correct in history:
@@ -16,21 +17,34 @@ def get_user_skill(history):
             user_skill = max(min(user_skill, dif) - 1, 0)
     return user_skill
 
+
 # Get recommended problem.
 # It will pick problem in problem_pool. If it is None, problem will be picked in all problems. 
-def recommend_problem (history:list[tuple[Problem, bool]], problem_pool:list[Problem] = None) -> Problem:
+def recommend_problem(
+        history: list[tuple[Problem, bool]],
+        problem_pool: list[Problem] | None = None,
+) -> Problem:
     user_skill = get_user_skill(history)
 
     tried_pid = set([record[0].id for record in history])
 
-    if problem_pool == None:
+    if problem_pool is None:
         problem_pool = list(get_problems_dict().values())
 
     # Filter problems already in history
-    problem_pool = [ problem for problem in problem_pool if problem.id not in tried_pid ]
+    problem_pool = [
+        problem
+        for problem in problem_pool
+        if problem.id not in tried_pid
+    ]
 
     # Try to filter problems by user skill
-    user_skill_pool = [ problem for problem in problem_pool if abs(difficulty_gen(problem) - user_skill) <= 1 ]
+    user_skill_pool = [
+        problem
+        for problem in problem_pool
+        if abs(difficulty_gen(problem) - user_skill) <= 1
+    ]
+
     if len(user_skill_pool) > 0:
         problem_pool = user_skill_pool
 
@@ -48,4 +62,3 @@ def recommend_problem (history:list[tuple[Problem, bool]], problem_pool:list[Pro
                 argmax = problem
         # print("Similarity: ", max_similarity)
         return argmax
-

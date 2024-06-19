@@ -4,7 +4,9 @@ import pickle
 from classes.similarity.encoder import encode_mise
 from settings.db_loader import get_full_data
 
+
 vectors = None
+
 
 def evaluate(indices, overwrite=False):
     get_vectors()
@@ -20,6 +22,7 @@ def evaluate(indices, overwrite=False):
     pickle.dump(vectors, file)
     file.close()
 
+
 def get_vectors():
     global vectors
     if vectors is not None:
@@ -32,7 +35,7 @@ def get_vectors():
         vectors = pickle.load(file)
         file.close()
 
-    if vectors == None:
+    if vectors is None:
         vectors = {}
     
     return vectors
