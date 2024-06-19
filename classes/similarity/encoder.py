@@ -2,6 +2,7 @@ import asyncio
 from llm.ai_handler import AiHandler
 from llm.utils import run_prompt
 from settings.config_loader import get_settings
+from classes.common.textify import textify_mise, textify_gen
 
 from transformers import BertTokenizer, BertModel
 import torch
@@ -11,37 +12,7 @@ import json
 model = None
 tokenizer = None
 
-def get_parameters(problem):
-    meta = problem.get_attribute("code")
-
-    description = ""
-    problem_array = meta.get_attribute("problem_array")
-    for piece in json.loads(problem_array):
-        typename = piece["type"]
-        if (typename == "image"):
-            pass
-        else:
-            description += piece[typename] + "\n"
-    
-    selections = []
-    for i in range(1, 6):
-        selection_text = "s" + str(i)
-        if meta.has_attribute(selection_text):
-            selection = meta.get_attribute(selection_text)
-            if len(selection) > 0:
-                selections.append(selection)
-    
-    answer = json.loads(meta.get_attribute("answer_grading"))[0]
-
-    if len(selections) > 0:
-        try:
-            answer = selections[int(answer)-1]
-        except:
-            pass # Do nothing, 'answer' remains unchanged
-
-    return description, selections, answer
-
-def encode (description, selections, answer):
+def encode (problem_text):
     handler = AiHandler()
     
     prompt = get_settings()["similarity_util_translate"]
@@ -50,8 +21,7 @@ def encode (description, selections, answer):
             handler,
             prompt,
             user_vars={
-                "description": description,
-                "answer": answer
+                "problem": problem_text
             },
             system_vars=dict(),
         )
@@ -107,6 +77,8 @@ def encode (description, selections, answer):
 
     return sentence_vector.flatten()
 
-def encode_problem (problem):
-    description, selections, answer = get_parameters(problem)
-    return encode(description, selections, answer)
+def encode_mise (problem):
+    return encode(textify_mise(problem))
+
+def encode_gen (problem):
+    return encode(textify_gen(problem))

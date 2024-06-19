@@ -9,11 +9,7 @@ user = """\
 Please translate following problem to english, between $$$ and $$$.
 If the problem contains symbols like (가), (나), (다), please translate it like (a), (b), (c).
 $$$
-다음 문단은 문제의 지문이다.
-{{ description|trim }}
-
-정답은 다음과 같다.
-{{ answer|trim }}
+{{ problem|trim }}
 $$$
 """
 

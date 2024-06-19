@@ -1,4 +1,4 @@
-from classes.similarity.main import similarity_gen
+from classes.difficulty.main import difficulty_gen
 import bank.models as models
 from pathlib import Path
 
@@ -15,9 +15,8 @@ if __name__ == "__main__":
     random.seed(777)
     sampled = random.sample(problems, 5)
 
-    for i in range(len(sampled)):
-        for j in range(len(sampled)):
-            sim = similarity_gen(sampled[i], sampled[j])
-            print(f"{sim:.3f}", end=' ')
-        print()
-    
+    results = []
+    for problem in sampled:
+        results.append(difficulty_gen(problem))
+
+    print(results)
