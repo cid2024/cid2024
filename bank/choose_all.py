@@ -151,7 +151,6 @@ def make_choose_all_problems() -> list[models.Problem]:
     return problems
 
 
-
 def commit_db():
     distractor_db.load_db()
     problems = make_choose_all_problems()
@@ -160,15 +159,20 @@ def commit_db():
         pickle.dump(problems, f)
 
 
-if __name__ == "__main__":
-    pp = pprint.PrettyPrinter(indent=4)
+choose_all_problems: list[models.Problem] = []
 
-    # commit_db()
 
-    problems: list[models.Problem] = []
+def load_db() -> None:
+    global choose_all_problems
 
     parent_dir = Path(__file__).resolve().parent
     with open(parent_dir / "choose_all_problems.pkl.final", "rb") as f:
-        problems = pickle.load(f)
+        choose_all_problems = pickle.load(f)
 
-    pp.pprint(problems)
+
+if __name__ == "__main__":
+    pp = pprint.PrettyPrinter(indent=4)
+
+    load_db()
+
+    pp.pprint(choose_all_problems)

@@ -94,15 +94,19 @@ def commit_db():
         pickle.dump(problems, f)
 
 
+tf_problems: list[models.Problem] = []
+
+
+def load_db():
+    global tf_problems
+
+    with open("tf_problems.pkl.final", "rb") as f:
+        tf_problems = pickle.load(f)
+
+
 if __name__ == "__main__":
     pp = pprint.PrettyPrinter(indent=4)
 
-    # commit_db()
+    load_db()
 
-    problems: list[models.Problem] = []
-
-    parent_dir = Path(__file__).resolve().parent
-    with open(parent_dir / "tf_problems.pkl.final", "rb") as f:
-        problems = pickle.load(f)
-
-    pp.pprint(problems)
+    pp.pprint(tf_problems)
