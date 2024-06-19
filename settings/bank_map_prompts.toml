@@ -1,0 +1,29 @@
+[bank_map_get_location_prompt]
+model = "gpt-4o"
+temperature = 0.2
+frequency_penalty = 0.1
+system = """\
+당신은 세계 지리와 역사에 대해 깊은 지식을 가지고 있습니다.
+"""
+user = """\
+다음 지명의 공식적인 한국어 및 영어 명칭을 답하라.
+
+지명: {{ place|trim }}
+
+다음 Pydantic 정의를 참고하여, $Place 타입과 일치하는 YAML 객체를 출력하라:
+===
+Class Place(BaseModel):
+    kor_name: str = Field(description="공식적인 한국어 명칭")
+    eng_name: str = Field(description="공식적인 영어 명칭")
+===
+
+YAML 객체 예시:
+```yaml
+place:
+- kor_name: ...
+  eng_name: ...
+```
+
+Answer:
+```yaml
+"""
