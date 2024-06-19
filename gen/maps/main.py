@@ -1,7 +1,11 @@
+import base64
+from io import BytesIO
+
 import requests
 import geopandas as gpd
 import matplotlib.pyplot as plt
 import contextily as ctx
+from PIL import Image
 
 from deep_translator import GoogleTranslator
 from shapely import Polygon
@@ -13,9 +17,6 @@ from log import get_logger
 
 logger = get_logger(__name__)
 
-plt.rcParams['font.family'] = 'Apple SD Gothic Neo'
-plt.rcParams['axes.unicode_minus'] = False
-
 session = requests.Session()
 session.headers.update({'User-Agent': 'cid2024-01'})
 
@@ -23,6 +24,11 @@ session.headers.update({'User-Agent': 'cid2024-01'})
 def kor_ord(idx: int) -> str:
     kor_dict = ['가', '나', '다', '라', '마', '바', '사', '아', '자', '차', '카', '타', '파', '하']
     return '(' + (kor_dict[idx] if idx < len(kor_dict) else chr(ord('A') + idx)) + ')'
+
+
+def init_plt() -> None:
+    plt.rcParams['font.family'] = 'Apple SD Gothic Neo'
+    plt.rcParams['axes.unicode_minus'] = False
 
 
 def geocoding(query: str):
@@ -63,7 +69,11 @@ def gen_bbox(feature_dict: dict) -> Polygon:
     return box(minx=-180, miny=-60, maxx=180, maxy=75)
 
 
-def display_features(feature_dict: dict, use_points: bool, annotated: bool):
+def get_display_features_base64(
+        feature_dict: dict,
+        use_points: bool,
+        annotated: bool,
+) -> str:
     bbox = gen_bbox(feature_dict)
     gdf_bb = gpd.GeoDataFrame({"name": ["Bounding Box"], "value": [0]}, crs="EPSG:4326", geometry=[bbox])
     gdf_bb = gdf_bb.to_crs(epsg=3857)
@@ -86,10 +96,19 @@ def display_features(feature_dict: dict, use_points: bool, annotated: bool):
                 fontweight='heavy',
             )
     gdf_bb.plot(ax=ax, alpha=0)
-    assert gdf.crs.to_string() == gdf_bb.crs.to_string()
+    if gdf.crs.to_string() != gdf_bb.crs.to_string():
+        return ''
+
     ctx.add_basemap(ax, crs=gdf.crs.to_string(), source=ctx.providers.CartoDB.PositronNoLabels)
-    plt.savefig('geojson_map.png')
-    plt.show()
+
+    image_buffer = BytesIO()
+    plt.tight_layout()
+    plt.axis('off')
+    plt.savefig(image_buffer, dpi=150, format='png', bbox_inches='tight')
+    plt.close(fig)
+    image_buffer.seek(0)
+
+    return base64.b64encode(image_buffer.read()).decode('utf-8')
 
 
 def translate_to_points(feature_list: list[dict]) -> list[dict]:
@@ -115,64 +134,98 @@ def translate_to_points(feature_list: list[dict]) -> list[dict]:
     return ret
 
 
-def draw_map(query_list: list[str], use_points: bool = False, annotated: bool = False):
-    features: list[dict] = []
-    n_id = 0
-    for query in query_list:
-        logger.debug("Sending query: %s" % query)
-        geometry = geocoding(query)
-        if geometry is None:
-            logger.debug("No result from Nominatim.")
-            pass
-        else:
-            logger.debug("Received query")
-            if use_points:
-                features.append({
-                    "id": n_id,
-                    "type": "Feature",
-                    "geometry": {
-                        "type": "Point",
-                        "coordinates": [
-                            geometry[0]['lon'],
-                            geometry[0]['lat'],
-                        ],
-                    },
-                    "properties": {
-                        "name": query,
-                    },
-                })
+def get_map_base64(
+        query_list: list[str],
+        use_points: bool = False,
+        annotated: bool = False,
+) -> str:
+    try:
+        init_plt()
+
+        features: list[dict] = []
+        n_id = 0
+        for query in query_list:
+            logger.debug("Sending query: %s" % query)
+            geometry = geocoding(query)
+            if geometry is None:
+                logger.debug("No result from Nominatim.")
+                pass
             else:
-                features.append({
-                    "id": n_id,
-                    "type": "Feature",
-                    "geometry": geometry[0]['geojson'],
-                    "properties": {
-                        "name": query,
-                    },
-                })
+                logger.debug("Received query")
+                if use_points:
+                    features.append({
+                        "id": n_id,
+                        "type": "Feature",
+                        "geometry": {
+                            "type": "Point",
+                            "coordinates": [
+                                geometry[0]['lon'],
+                                geometry[0]['lat'],
+                            ],
+                        },
+                        "properties": {
+                            "name": query,
+                        },
+                    })
+                else:
+                    features.append({
+                        "id": n_id,
+                        "type": "Feature",
+                        "geometry": geometry[0]['geojson'],
+                        "properties": {
+                            "name": query,
+                        },
+                    })
 
-            n_id += 1
+                n_id += 1
 
-    if use_points:
-        display_features(
-            {
-                "type": "FeatureCollection",
-                "features": translate_to_points(features),
-            },
-            use_points,
-            annotated,
-        )
-    else:
-        display_features(
-            {
-                "type": "FeatureCollection",
-                "features": features,
-            },
-            use_points,
-            annotated,
-        )
+        if use_points:
+            return get_display_features_base64(
+                {
+                    "type": "FeatureCollection",
+                    "features": translate_to_points(features),
+                },
+                use_points,
+                annotated,
+            )
+        else:
+            return get_display_features_base64(
+                {
+                    "type": "FeatureCollection",
+                    "features": features,
+                },
+                use_points,
+                annotated,
+            )
+    except:
+        return ''
+
+
+def get_optimized_map_base64(
+        query_list: list[str],
+        use_points: bool = False,
+        annotated: bool = False,
+) -> str:
+    base_str = get_map_base64(query_list, use_points, annotated)
+
+    if not base_str:
+        return ''
+
+    image_data = base64.b64decode(base_str)
+    image = Image.open(BytesIO(image_data))
+
+    buffer = BytesIO()
+    image.save(buffer, format='PNG', optimize=True, compress_level=9)
+    buffer.seek(0)
+
+    return base64.b64encode(buffer.read()).decode('utf-8')
 
 
 if __name__ == "__main__":
-    # draw_map(["북인도양", "인도양"], False, True)
-    draw_map(["티베트고원", "청나라"], False, True)
+    base_str = get_optimized_map_base64(["North Hamgyong Province"], True, False)
+
+    print(base_str)
+
+    image_data = base64.b64decode(base_str)
+    with open("geojson_map.png", 'wb') as file:
+        file.write(image_data)
