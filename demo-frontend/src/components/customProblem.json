@@ -1,0 +1,40 @@
+{
+    "answer": "나, 다",
+    "choice": [
+      [
+        "가",
+        [
+          {
+            "data": "test",
+            "type": "text"
+          }
+        ]
+      ],
+      [
+        "나",
+        [
+          {
+            "data": "test",
+            "type": "text"
+          }
+        ]
+      ],
+      [
+        "다",
+        [
+          {
+            "data": "test",
+            "type": "text"
+          }
+        ]
+      ]
+    ],
+    "explanation": "test",
+    "id": "test",
+    "statement": [
+      {
+        "data": "test",
+        "type": "text"
+      }
+    ]
+  }

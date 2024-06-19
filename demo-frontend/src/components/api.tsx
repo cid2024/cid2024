@@ -1,26 +1,10 @@
 import axios from 'axios';
+import { Problem } from './types';
 
-type StatementElementType = "text" | "image" | "embed_image";
+const API_URL = 'http://127.0.0.1:6610';
 
-type StatementElement = {
-  type: StatementElementType;
-  data: string;
-}
-
-type Choice = {
-  id: string;
-  statement: StatementElement[];
-}
-
-type Problem = {
-  id: string;
-  statement: StatementElement[];
-  choices: Choice[];
-  answer: string;
-}
-
-export const getProblemById = (id: number): Promise<Problem | null> => {
-  return axios.get<Problem>(`/problems/${id}`, {responseType: 'json'})
+export const getProblemById = (id: string): Promise<Problem | null> => {
+  return axios.get<Problem>(`${API_URL}/problems/${id}`, {responseType: 'json'})
     .then((response) => {
       return response.data;
     })
