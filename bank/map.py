@@ -279,12 +279,7 @@ def load_db_resolved_region_data() -> None:
         regions_data = pickle.load(f)
 
 
-if __name__ == "__main__":
-    pp = pprint.PrettyPrinter(indent=4)
-
-    load_db_resolved_region_data()
-    bank_region.load_db_possible_records()
-
+def commit_db_map_problems() -> None:
     regions_dict: dict[str, RegionData] = {
         region_data.name: region_data
         for region_data in regions_data
@@ -347,5 +342,29 @@ if __name__ == "__main__":
             )
         )
 
+        if idx % 20 == 0:
+            with open(f"map_problems.{idx}.pickle", "wb") as f:
+                pickle.dump(map_problems, f)
+
     with open("map_problems.pickle", "wb") as f:
         pickle.dump(map_problems, f)
+
+
+map_problems: list[models.Problem] = []
+
+
+def load_db_map_problems() -> None:
+    global map_problems
+
+    parent_dir = Path(__file__).resolve().parent
+    for i in range(4):
+        with open(parent_dir / f"map_problems.{i}.pickle.final", "rb") as f:
+            map_problems.extend(pickle.load(f))
+
+
+if __name__ == "__main__":
+    pp = pprint.PrettyPrinter(indent=4)
+
+    load_db_map_problems()
+
+    print(len(map_problems))
