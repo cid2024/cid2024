@@ -1,5 +1,5 @@
-
 import json
+
 
 def textify_mise(problem):
     meta = problem.get_attribute("code")
@@ -8,7 +8,7 @@ def textify_mise(problem):
     problem_array = meta.get_attribute("problem_array")
     for piece in json.loads(problem_array):
         typename = piece["type"]
-        if (typename == "image"):
+        if typename == "image":
             pass
         else:
             description += piece[typename] + "\n"
@@ -32,10 +32,11 @@ def textify_mise(problem):
 
     return problem_text
 
+
 def textify_gen(problem):
     problem_text = ""
     for piece in problem.statement:
-        if (piece.type == "text"):
+        if piece.type == "text":
             problem_text += piece.data + "\n"
     problem_text += "\n선택지:\n"
     
@@ -43,9 +44,9 @@ def textify_gen(problem):
         problem_text += num + ": "
         choice_text = ""
         for piece in choice_array:
-            if (len(choice_text) > 0):
+            if choice_text:
                 choice_text += ", "
-            if (piece.type == "text"):
+            if piece.type == "text":
                 choice_text += piece.data
             else:
                 choice_text += "None"

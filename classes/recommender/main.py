@@ -6,6 +6,7 @@ from classes.similarity.main import similarity_gen
 
 import random
 
+
 def get_user_skill(history):
     user_skill = 0
     for problem, correct in history:
@@ -16,28 +17,58 @@ def get_user_skill(history):
             user_skill = max(min(user_skill, dif) - 1, 0)
     return user_skill
 
+
 # Get recommended problem.
 # It will pick problem in problem_pool. If it is None, problem will be picked in all problems. 
-def recommend_problem (history:list[tuple[Problem, bool]], problem_pool:list[Problem] = None) -> Problem:
+def recommend_problem(
+        history_data: list[tuple[str, bool]],
+        problem_pool: list[Problem] | None = None,
+) -> tuple[Problem, float]:
+    full_problems_dict = get_problems_dict()
+
+    if problem_pool is None:
+        problem_pool = list(full_problems_dict.values())
+
+    if not history_data:
+        return random.choice(problem_pool), 0.0
+
+    history = [
+        (
+            full_problems_dict[pid],
+            correct,
+        )
+        for pid, correct in history_data
+        if pid in full_problems_dict
+    ]
+
     user_skill = get_user_skill(history)
 
     tried_pid = set([record[0].id for record in history])
 
-    if problem_pool == None:
-        problem_pool = list(get_problems_dict().values())
-
     # Filter problems already in history
-    problem_pool = [ problem for problem in problem_pool if problem.id not in tried_pid ]
+    problem_pool = [
+        problem
+        for problem in problem_pool
+        if problem.id not in tried_pid
+    ]
 
     # Try to filter problems by user skill
-    user_skill_pool = [ problem for problem in problem_pool if abs(difficulty_gen(problem) - user_skill) <= 1 ]
+    user_skill_pool = [
+        problem
+        for problem in problem_pool
+        if abs(difficulty_gen(problem) - user_skill) <= 1
+    ]
+
     if len(user_skill_pool) > 0:
         problem_pool = user_skill_pool
 
     (last_problem, last_problem_correct) = history[-1]
 
     if last_problem_correct:
-        return random.choice(problem_pool)
+        if problem_pool:
+            return random.choice(problem_pool), 0.4 + random.random() / 5
+        else:
+            return random.choice(list(full_problems_dict.values())), 0.4 + random.random() / 5
     else:
         max_similarity = -1
         argmax = None
@@ -47,5 +78,14 @@ def recommend_problem (history:list[tuple[Problem, bool]], problem_pool:list[Pro
                 max_similarity = similarity
                 argmax = problem
         # print("Similarity: ", max_similarity)
-        return argmax
 
+        if argmax is None:
+            return random.choice(list(full_problems_dict.values())), 0.4 + random.random() / 5
+
+        return argmax, min(1.0, max(0.0, max_similarity))
+
+
+if __name__ == "__main__":
+    pass
+
+    # print(recommend_problem(history_data=[('gen.region.map.512', True)]))

@@ -1,6 +1,7 @@
 import asyncio
 import pickle
 import pprint
+import random
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -8,6 +9,7 @@ import gen.event.db.main as event_db
 import gen.region.db.main as region_db
 
 from bank import models
+import bank.map as bank_map
 from gen.distractor.db.main import ReferenceRecord
 from llm.ai_handler import AiHandler
 from llm.utils import run_prompt
@@ -213,18 +215,77 @@ def load_db_possible_records() -> None:
         region_blank_records = pickle.load(f)
 
 
+def commit_db_region_blank_problems() -> None:
+    region_names: set[str] = {
+        data.name
+        for data in bank_map.regions_data
+    }
+
+    region_blank_problems: list[models.Problem] = []
+
+    for record in region_blank_records:
+        if 1 != len(record.possible_answers):
+            continue
+
+        if record.possible_answers[0].name != record.problem.answer:
+            continue
+
+        if record.problem.answer not in region_names:
+            continue
+
+        choices: list[str] = sorted(list(set(
+            [record.problem.answer]
+            + [
+                distractor.name
+                for distractor in record.distractors
+                if distractor.name in region_names
+            ]
+        )))
+
+        if len(choices) < 3:
+            continue
+
+        random.shuffle(choices)
+
+        region_blank_problems.append(
+            models.Problem(
+                id=record.problem.id,
+                statement=record.problem.statement,
+                choice=[
+                    (
+                        ["가", "나", "다", "라", "마", "바", "사"][idx],
+                        [
+                            models.StatementElement(
+                                type="text",
+                                data=region_name,
+                            ),
+                        ]
+                    )
+                    for idx, region_name in enumerate(choices)
+                ],
+                answer=["가", "나", "다", "라", "마", "바", "사"][choices.index(record.problem.answer)],
+                explanation=record.problem.explanation,
+            )
+        )
+
+    with open("region_blank_problems.pickle", "wb") as f:
+        pickle.dump(region_blank_problems, f)
+
+
+region_blank_problems: list[models.Problem] = []
+
+
+def load_db_region_blank_problems() -> None:
+    global region_blank_problems
+
+    parent_dir = Path(__file__).resolve().parent
+    with open(parent_dir / "region_blank_problems.pickle.final", "rb") as f:
+        region_blank_problems = pickle.load(f)
+
+
 if __name__ == "__main__":
     pp = pprint.PrettyPrinter(indent=4, width=120)
 
-    event_db.load_db()
-    region_db.load_db()
+    load_db_region_blank_problems()
 
-    load_db_possible_records()
-
-    good_records = [
-        record for record in region_blank_records
-        if len(record.possible_answers) <= 2
-    ]
-
-    for record in good_records:
-        pp.pprint(record)
+    pp.pprint(region_blank_problems)

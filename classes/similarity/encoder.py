@@ -9,10 +9,12 @@ from bank.models import Problem
 from transformers import BertTokenizer, BertModel
 import torch
 
+
 model = None
 tokenizer = None
 
-def encode (problem_text:str) -> torch.Tensor:
+
+def encode(problem_text: str) -> torch.Tensor:
     handler = AiHandler()
     
     prompt = get_settings()["similarity_util_translate"]
@@ -53,12 +55,12 @@ def encode (problem_text:str) -> torch.Tensor:
 
     # Load pre-trained model tokenizer (vocabulary)
     global tokenizer
-    if tokenizer == None:
+    if tokenizer is None:
         tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
     # Load pre-trained model (weights)
     global model
-    if model == None:
+    if model is None:
         model = BertModel.from_pretrained('bert-base-uncased')
         model.eval()
 
@@ -77,8 +79,10 @@ def encode (problem_text:str) -> torch.Tensor:
 
     return sentence_vector.flatten()
 
-def encode_mise (problem:DataEntry) -> torch.Tensor:
+
+def encode_mise(problem: DataEntry) -> torch.Tensor:
     return encode(textify_mise(problem))
 
-def encode_gen (problem:Problem) -> torch.Tensor:
+
+def encode_gen(problem: Problem) -> torch.Tensor:
     return encode(textify_gen(problem))

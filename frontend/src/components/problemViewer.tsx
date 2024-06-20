@@ -1,5 +1,5 @@
 import {Problem, StatementElement} from "../types/problem";
-import {Box, Stack, Typography} from "@mui/material";
+import {Box, Button, Grid, Stack, TextField, Typography} from "@mui/material";
 
 
 interface StatementElementViewerProps {
@@ -23,7 +23,7 @@ const StatementElementViewer = ({
             <Box
                 component="img"
                 sx={{
-                    width: '300px',
+                    width: '600px',
                     height: 'auto',
                     borderRadius: '16px',
                 }}
@@ -37,7 +37,7 @@ const StatementElementViewer = ({
             <Box
                 component="img"
                 sx={{
-                    width: '300px',
+                    width: '800px',
                     height: 'auto',
                     borderRadius: '16px',
                 }}
@@ -56,11 +56,17 @@ const StatementElementViewer = ({
 
 interface ProblemViewerProps {
     problem: Problem;
+    userAnswer: string;
+    setUserAnswer: (userAnswer: string) => void;
+    onShowSolution: () => void;
     showSolution?: boolean;
 }
 
 export const ProblemViewer = ({
     problem,
+    userAnswer,
+    setUserAnswer,
+    onShowSolution,
     showSolution = false,
 }: ProblemViewerProps) => {
     return (
@@ -109,6 +115,42 @@ export const ProblemViewer = ({
                         </Stack>
                     ))}
                 </Stack>
+                <Grid
+                    container
+                    spacing={2}
+                >
+                    <Grid
+                        item
+                        xs={10}
+                    >
+                        <TextField
+                            id="user-answer"
+                            label="답"
+                            value={userAnswer}
+                            onChange={(e) => setUserAnswer(e.target.value)}
+                            disabled={showSolution}
+                            fullWidth
+                        />
+                    </Grid>
+                    <Grid
+                        item
+                        xs={2}
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                        }}
+                    >
+                        <Button
+                            id="submit-answer"
+                            variant="contained"
+                            color="primary"
+                            disabled={showSolution}
+                            onClick={onShowSolution}
+                        >
+                            정답 확인
+                        </Button>
+                    </Grid>
+                </Grid>
                 {showSolution && (
                     <Stack
                         spacing={2}
