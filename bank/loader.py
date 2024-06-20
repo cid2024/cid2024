@@ -1,5 +1,6 @@
 import pickle
 import pprint
+import random
 from pathlib import Path
 
 from bank import models
@@ -7,6 +8,7 @@ import bank.choose_all as bank_choose_all
 import bank.map as bank_map
 import bank.region as bank_region
 import bank.tf as bank_tf
+import bank.db_bank as bank_mise
 
 
 # Get (id, problem) dictionary of all problems in 'bank/'
@@ -25,6 +27,13 @@ def get_problems_dict() -> dict[str, models.Problem]:
     bank_tf.load_db()
     problems.extend(bank_tf.tf_problems)
 
+    bank_mise.load_db()
+    problems.extend(bank_mise.mise_problems)
+
+    # for debugging
+    random.shuffle(problems)
+    problems = problems[:5]
+
     return {
         problem.id: problem
         for problem in problems
@@ -36,4 +45,5 @@ if __name__ == "__main__":
 
     problems_dict = get_problems_dict()
 
+    pp.pprint(problems_dict)
     print(len(problems_dict))
