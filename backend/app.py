@@ -10,11 +10,6 @@ CORS(app)
 problems_dict: dict[str, models.Problem] = {}
 
 
-@app.route('/')
-def home():
-    return jsonify(message="Welcome to the Flask backend!")
-
-
 @app.route('/problems/<string:id>', methods=['GET'])
 def get_data(id: str) -> Response:
     return jsonify(problems_dict[id])
