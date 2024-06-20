@@ -28,7 +28,7 @@ choco install python --version=3.11.0
 
 ### 2. Install poetry
 
-https://python-poetry.org/docs/#installation
+https://python-poetry.org/docs/#installing-with-pipx
 
 ## Install dependencies
 
