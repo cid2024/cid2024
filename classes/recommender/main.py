@@ -8,13 +8,13 @@ import random
 
 
 def get_user_skill(history):
-    user_skill = 0
+    user_skill = 2
     for problem, correct in history:
         dif = difficulty_gen(problem)
         if correct:
-            user_skill = min(max(user_skill, dif) + 1, 10)
+            user_skill = min(max(user_skill, dif) + 1, 9)
         else:
-            user_skill = max(min(user_skill, dif) - 1, 0)
+            user_skill = max(min(user_skill, dif) - 1, 2)
     return user_skill
 
 
