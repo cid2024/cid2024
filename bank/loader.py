@@ -46,5 +46,5 @@ if __name__ == "__main__":
 
     problems_dict = get_problems_dict()
 
-    pp.pprint(problems_dict)
+    # pp.pprint(problems_dict)
     print(len(problems_dict))

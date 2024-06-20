@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from bank import models
-from bank.region import RegionBlankRecord, RegionBlankDistractor, RegionBlankPossibleAnswer
 import bank.region as bank_region
 from gen.maps.main import get_optimized_map_base64
 from llm.ai_handler import AiHandler
