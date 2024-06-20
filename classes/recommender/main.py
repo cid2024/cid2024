@@ -21,15 +21,29 @@ def get_user_skill(history):
 # Get recommended problem.
 # It will pick problem in problem_pool. If it is None, problem will be picked in all problems. 
 def recommend_problem(
-        history: list[tuple[Problem, bool]],
+        history_data: list[tuple[str, bool]],
         problem_pool: list[Problem] | None = None,
 ) -> Problem:
+    full_problems_dict = get_problems_dict()
+
+    if problem_pool is None:
+        problem_pool = list(full_problems_dict.values())
+
+    if not history_data:
+        return random.choice(problem_pool)
+
+    history = [
+        (
+            full_problems_dict[pid],
+            correct,
+        )
+        for pid, correct in history_data
+        if pid in full_problems_dict
+    ]
+
     user_skill = get_user_skill(history)
 
     tried_pid = set([record[0].id for record in history])
-
-    if problem_pool is None:
-        problem_pool = list(get_problems_dict().values())
 
     # Filter problems already in history
     problem_pool = [
@@ -51,7 +65,10 @@ def recommend_problem(
     (last_problem, last_problem_correct) = history[-1]
 
     if last_problem_correct:
-        return random.choice(problem_pool)
+        if problem_pool:
+            return random.choice(problem_pool)
+        else:
+            return random.choice(list(full_problems_dict.values()))
     else:
         max_similarity = -1
         argmax = None
@@ -61,4 +78,12 @@ def recommend_problem(
                 max_similarity = similarity
                 argmax = problem
         # print("Similarity: ", max_similarity)
+
+        if argmax is None:
+            return random.choice(list(full_problems_dict.values()))
+
         return argmax
+
+
+if __name__ == "__main__":
+    print(recommend_problem(history_data=[('gen.region.map.512', True)]).id)
