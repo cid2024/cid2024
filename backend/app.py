@@ -22,4 +22,5 @@ def get_data(id: str) -> Response:
 
 if __name__ == '__main__':
     problems_dict = get_problems_dict()
+    print(problems_dict.keys())
     app.run(host='0.0.0.0', port=6610, debug=True)

@@ -100,7 +100,8 @@ tf_problems: list[models.Problem] = []
 def load_db():
     global tf_problems
 
-    with open("tf_problems.pkl.final", "rb") as f:
+    parent_dir = Path(__file__).resolve().parent
+    with open(parent_dir / "tf_problems.pkl.final", "rb") as f:
         tf_problems = pickle.load(f)
 
 

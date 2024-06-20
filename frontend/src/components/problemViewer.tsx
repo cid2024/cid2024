@@ -37,7 +37,7 @@ const StatementElementViewer = ({
             <Box
                 component="img"
                 sx={{
-                    width: '300px',
+                    width: '800px',
                     height: 'auto',
                     borderRadius: '16px',
                 }}
