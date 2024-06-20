@@ -21,7 +21,7 @@ def json_array_to_element_list(array):
     return element_list
 
 if __name__ == "__main__":
-    data = db_loader.get_full_data()
+    data = db_loader.get_full_data(False)
 
     problems = list(data["ProblemMeta"].values())
     converted_db = []
