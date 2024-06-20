@@ -30,10 +30,10 @@ def get_problems_dict() -> dict[str, models.Problem]:
     bank_mise.load_db()
     problems.extend(bank_mise.mise_problems)
 
-    # for debugging
-    random.seed(1557)
-    random.shuffle(problems)
-    problems = problems[:5]
+    # # for debugging
+    # random.seed(1557)
+    # random.shuffle(problems)
+    # problems = problems[:5]
 
     return {
         problem.id: problem
