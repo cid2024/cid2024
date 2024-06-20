@@ -27,31 +27,40 @@ if __name__ == "__main__":
     converted_db = []
 
     for problem in problems:
-        subject = problem.get_attribute("meta_id").get_attribute("subject")
-        if not (subject == "한국사" or subject == "세계사" or subject == "동아시아사"):
-            continue
-        converted = Problem(id=None,statement=None,choice=[],answer=None,explanation=None)
-        converted.id = "mise." + str(problem.get_attribute("id"))
+        try:
+            subject = problem.get_attribute("meta_id").get_attribute("subject")
+            if subject == "한국사":
+                subject = "korean"
+            elif subject == "동아시아사":
+                subject = "eastasia"
+            elif subject == "세계사":
+                subject = "world"
+            else:
+                continue
+            converted = Problem(id=None,statement=None,choice=[],answer=None,explanation=None)
+            converted.id = "mise." + subject + "." + str(problem.get_attribute("id"))
 
-        converted.statement = json_array_to_element_list(problem.get_attribute("problem_array"))
+            converted.statement = json_array_to_element_list(problem.get_attribute("problem_array"))
 
-        for i in range(1, 6):
-            selection_text = "s" + str(i)
-            if problem.has_attribute(selection_text):
-                element = StatementElement(type=None,data=None)
-                element.type = "text"
-                element.data = problem.get_attribute(selection_text)
-                converted.choice.append((str(i), [element]))
-        
-        converted.answer = str(json.loads(problem.get_attribute("answer_grading"))[0])
-        
-        converted.explanation = ""
-        if problem.has_attribute("explain"):
-            explanation = problem.get_attribute("explain")
-            if explanation is not None and len(explanation) > 0:
-                converted.explanation = explanation
-
-        converted_db.append(converted)
+            for i in range(1, 6):
+                selection_text = "s" + str(i)
+                if problem.has_attribute(selection_text):
+                    element = StatementElement(type=None,data=None)
+                    element.type = "text"
+                    element.data = problem.get_attribute(selection_text)
+                    converted.choice.append((str(i), [element]))
+            
+            converted.answer = str(json.loads(problem.get_attribute("answer_grading"))[0])
+            
+            converted.explanation = ""
+            if problem.has_attribute("explain"):
+                explanation = problem.get_attribute("explain")
+                if explanation is not None and len(explanation) > 0:
+                    converted.explanation = explanation
+            
+            converted_db.append(converted)
+        except:
+            pass
     
     print("Total num:", len(converted_db))
     parent_dir = Path(__file__).resolve().parent
