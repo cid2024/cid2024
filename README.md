@@ -8,6 +8,7 @@ The Best Educational Social/History Test Questions Recommendation System
 
 - Python 3.11
 - poetry
+- npm
 
 ### 1. Install Python
 
@@ -29,6 +30,10 @@ choco install python --version=3.11.0
 ### 2. Install poetry
 
 https://python-poetry.org/docs/#installing-with-pipx
+
+### 3. Install npm
+
+https://docs.npmjs.com/downloading-and-installing-node-js-and-npm
 
 ## Install dependencies
 
