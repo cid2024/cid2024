@@ -30,10 +30,13 @@ def get_problems_dict() -> dict[str, models.Problem]:
     bank_mise.load_db()
     problems.extend(bank_mise.mise_problems)
 
-    # # for debugging
-    # random.seed(1557)
-    # random.shuffle(problems)
-    # problems = problems[:5]
+    selected_ids: list[str]
+
+    parent_dir = Path(__file__).parent
+    with open(parent_dir / "selected.txt", "r") as file:
+        selected_ids = list(filter(None, map(str.strip, map(str, file.readlines()))))
+
+    problems = list(filter(lambda problem: problem.id in selected_ids, problems))
 
     return {
         problem.id: problem

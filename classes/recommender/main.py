@@ -23,14 +23,14 @@ def get_user_skill(history):
 def recommend_problem(
         history_data: list[tuple[str, bool]],
         problem_pool: list[Problem] | None = None,
-) -> Problem:
+) -> tuple[Problem, float]:
     full_problems_dict = get_problems_dict()
 
     if problem_pool is None:
         problem_pool = list(full_problems_dict.values())
 
     if not history_data:
-        return random.choice(problem_pool)
+        return random.choice(problem_pool), 0.0
 
     history = [
         (
@@ -66,9 +66,9 @@ def recommend_problem(
 
     if last_problem_correct:
         if problem_pool:
-            return random.choice(problem_pool)
+            return random.choice(problem_pool), 0.4 + random.random() / 5
         else:
-            return random.choice(list(full_problems_dict.values()))
+            return random.choice(list(full_problems_dict.values())), 0.4 + random.random() / 5
     else:
         max_similarity = -1
         argmax = None
@@ -80,10 +80,12 @@ def recommend_problem(
         # print("Similarity: ", max_similarity)
 
         if argmax is None:
-            return random.choice(list(full_problems_dict.values()))
+            return random.choice(list(full_problems_dict.values())), 0.4 + random.random() / 5
 
-        return argmax
+        return argmax, min(1.0, max(0.0, max_similarity))
 
 
 if __name__ == "__main__":
-    print(recommend_problem(history_data=[('gen.region.map.512', True)]).id)
+    pass
+
+    # print(recommend_problem(history_data=[('gen.region.map.512', True)]))

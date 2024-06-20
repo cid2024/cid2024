@@ -138,9 +138,15 @@ mise_problems: list[models.Problem] = []
 def load_db() -> None:
     global mise_problems
 
+    mise_problems = []
+
     parent_path = Path(__file__).parent
-    with open(parent_path / "mise.pkl.final", "rb") as f:
-        mise_problems = pickle.load(f)
+
+    with open(parent_path / "mise.history.pkl.final", "rb") as f:
+        mise_problems.extend(pickle.load(f))
+
+    with open(parent_path / "mise.society.pkl.final", "rb") as f:
+        mise_problems.extend(pickle.load(f))
 
 
 if __name__ == "__main__":
@@ -148,4 +154,9 @@ if __name__ == "__main__":
 
     load_db()
 
-    pp.pprint(mise_problems)
+    # pp.pprint(mise_problems)
+
+    pp.pprint([
+        problem.id
+        for problem in mise_problems
+    ])

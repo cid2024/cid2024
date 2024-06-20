@@ -13,7 +13,7 @@ global_db = mysql.connector.connect(
     port = 3306,
     user = settings.mysql.user,
     password = settings.mysql.password,
-    database = "chery_history"
+    database = "chery_society"
 )
 cursor = global_db.cursor()
 
