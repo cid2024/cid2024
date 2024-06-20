@@ -18,7 +18,7 @@ def get_difficulties():
     if difficulties is not None:
         return difficulties
     
-    file_path = os.path.join(os.path.dirname(__file__), "difficulties.pkl")
+    file_path = os.path.join(os.path.dirname(__file__), "difficulties.pkl.usage")
 
     if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
         file = open(file_path, "rb")
@@ -37,7 +37,7 @@ def evaluate(problem, overwrite: bool = False):
     if overwrite or problem.id not in difficulties:
         difficulties[problem.id] = difficulty(textify_gen(problem))
 
-    file_path = os.path.join(os.path.dirname(__file__), "difficulties.pkl")
+    file_path = os.path.join(os.path.dirname(__file__), "difficulties.pkl.usage")
     file = open(file_path, "wb")
     pickle.dump(difficulties, file)
     file.close()

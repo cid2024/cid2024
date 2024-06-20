@@ -3,6 +3,7 @@ from bank.models import Problem
 import classes.difficulty.main as difficulty
 import classes.similarity.main as similarity
 
+
 if __name__ == "__main__":
     problems: list[Problem] = list(get_problems_dict().values())
     for problem in problems:

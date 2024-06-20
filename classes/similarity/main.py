@@ -15,7 +15,7 @@ def get_vectors():
     if vectors is not None:
         return vectors
     
-    file_path = os.path.join(os.path.dirname(__file__), "vectors.pkl")
+    file_path = os.path.join(os.path.dirname(__file__), "vectors.pkl.usage")
 
     if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
         file = open(file_path, "rb")
@@ -34,7 +34,7 @@ def evaluate(problem, overwrite = False):
     if overwrite or problem.id not in vectors:
         vectors[problem.id] = encode_gen(problem)
 
-    file_path = os.path.join(os.path.dirname(__file__), "vectors.pkl")
+    file_path = os.path.join(os.path.dirname(__file__), "vectors.pkl.usage")
     file = open(file_path, "wb")
     pickle.dump(vectors, file)
     file.close()
