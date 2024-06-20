@@ -1,30 +1,61 @@
-import settings.db_loader as db_loader
-from bank.models import Problem, StatementElement
-from pathlib import Path
 import json, pickle
+import pprint
+import re
 
-def json_array_to_element_list(array):
-    element_list = []
-    for piece in json.loads(array):
-        element = StatementElement(type=None,data=None)
+from bank import models
+from pathlib import Path
 
-        typename = piece["type"]
-        if (typename == "image"):
-            element.type = "image"
-            element.data = piece["url"]
-        else:
-            # typename as "text", "math", etc. treat as text.
-            element.type = "text"
-            element.data = piece[typename]
-        
-        element_list.append(element)
-    return element_list
+import settings.db_loader as db_loader
 
-if __name__ == "__main__":
+
+def json_array_to_element_list(json_str: str) -> list[models.StatementElement]:
+    try:
+        data = json.loads(json_str)
+    except:
+        return []
+
+    if not isinstance(data, list):
+        return []
+
+    ret: list[models.StatementElement] = []
+    for item in data:
+        if not isinstance(item, dict):
+            continue
+
+        typename = item.get("type", "")
+
+        if typename == "image":
+            url = item.get("url", "")
+            if url:
+                ret.append(
+                    models.StatementElement(
+                        type="image",
+                        data=url,
+                    )
+                )
+        elif typename in ["text", "math"]:
+            text = item.get(typename, "")
+
+            clean = re.compile('<.*?>')
+            text = re.sub(clean, '', text)
+            text = '\n'.join(map(str.strip, text.split('\n'))).strip()
+
+            if text:
+                ret.append(
+                    models.StatementElement(
+                        type="text",
+                        data=text,
+                    )
+                )
+
+    return ret
+
+
+def commit_db() -> None:
     data = db_loader.get_full_data(False)
 
     problems = list(data["ProblemMeta"].values())
-    converted_db = []
+    converted_db: list[models.Problem] = []
 
     for problem in problems:
         try:
@@ -37,33 +68,84 @@ if __name__ == "__main__":
                 subject = "world"
             else:
                 continue
-            converted = Problem(id=None,statement=None,choice=[],answer=None,explanation=None)
-            converted.id = "mise." + subject + "." + str(problem.get_attribute("id"))
 
-            converted.statement = json_array_to_element_list(problem.get_attribute("problem_array"))
+            problem_id = f"mise.{subject}.{problem.get_attribute('id')}"
+            problem_statement = json_array_to_element_list(problem.get_attribute("problem_array"))
+            if not problem_statement:
+                continue
+
+            problem_choices: list[list[models.StatementElement]] = []
 
             for i in range(1, 6):
                 selection_text = "s" + str(i)
                 if problem.has_attribute(selection_text):
-                    element = StatementElement(type=None,data=None)
-                    element.type = "text"
-                    element.data = problem.get_attribute(selection_text)
-                    converted.choice.append((str(i), [element]))
-            
-            converted.answer = str(json.loads(problem.get_attribute("answer_grading"))[0])
-            
-            converted.explanation = ""
-            if problem.has_attribute("explain"):
-                explanation = problem.get_attribute("explain")
-                if explanation is not None and len(explanation) > 0:
-                    converted.explanation = explanation
-            
-            converted_db.append(converted)
+                    text = str(problem.get_attribute(selection_text)).strip()
+                    if not text:
+                        continue
+
+                    clean = re.compile('<.*?>')
+                    text = re.sub(clean, '', text)
+                    text = '\n'.join(map(str.strip, text.split('\n'))).strip()
+                    if not text:
+                        continue
+
+                    problem_choices.append(
+                        [
+                            models.StatementElement(
+                                type="text",
+                                data=text,
+                            ),
+                        ]
+                    )
+
+            problem_answer = '\n'.join([
+                item.data
+                for item in json_array_to_element_list(problem.get_attribute("answer_array"))
+                if item.type == "text"
+            ])
+
+            problem_explanation = '\n'.join([
+                item.data
+                for item in json_array_to_element_list(problem.get_attribute("explain_array"))
+                if item.type == "text"
+            ])
+
+            converted_db.append(
+                models.Problem(
+                    id=problem_id,
+                    statement=problem_statement,
+                    choice=[
+                        (
+                            ["①", "②", "③", "④", "⑤"][idx],
+                            choice,
+                        )
+                        for idx, choice in enumerate(problem_choices)
+                    ],
+                    answer=problem_answer,
+                    explanation=problem_explanation,
+                )
+            )
         except:
             pass
-    
-    print("Total num:", len(converted_db))
-    parent_dir = Path(__file__).resolve().parent
-    with open(parent_dir / "mise.pkl", "wb") as f:
+
+    with open("mise.pkl", "wb") as f:
         pickle.dump(converted_db, f)
-                
+
+
+mise_problems: list[models.Problem] = []
+
+
+def load_db() -> None:
+    global mise_problems
+
+    parent_path = Path(__file__).parent
+    with open(parent_path / "mise.pkl.final", "rb") as f:
+        mise_problems = pickle.load(f)
+
+
+if __name__ == "__main__":
+    pp = pprint.PrettyPrinter(indent=4)
+
+    load_db()
+
+    pp.pprint(mise_problems)
